@@ -46,7 +46,7 @@ namespace ConsoleApp
             }
         }
 
-        static void WriteResult(string input, Result<List<SiplificationDescription>> result)
+        static void WriteResult(string input, Result<List<SimplificationDescription>> result)
         {
             if (result.HasValue)
                 WriteResultLines(result.Value);
@@ -54,7 +54,7 @@ namespace ConsoleApp
                 WriteSyntaxError(input, result.ErrorMessage, result.ErrorIndex, result.Token);
         }
 
-        private static void WriteResultLines(IEnumerable<SiplificationDescription> lines)
+        private static void WriteResultLines(IEnumerable<SimplificationDescription> lines)
         {
             foreach (var l in lines)
             {

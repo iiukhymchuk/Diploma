@@ -7,30 +7,33 @@ namespace SetTheory
 
     public class Pipeline
     {
-        public static Result<List<SiplificationDescription>> Process(string input)
+        public static Result<List<SimplificationDescription>> Process(string input)
         {
-            var settings = new DefaultSettings();
-            var syntax = new Syntax(settings);
+            var settings = new DefaultSettings(); // get settings from outside, not default
+
+            var syntax = new Syntax(settings); // inject
             var tokensResult = syntax.GetTokenizer.TryTokenize(input);
             if (!tokensResult.HasValue)
             {
                 var errorIndex = GetErrorIndex(tokensResult.ErrorPosition);
                 var token = tokensResult.Remainder.First(1).ToStringValue();
                 // use localized user error messages
-                return new Result<List<SiplificationDescription>>($"Syntax error for input '{token}'", errorIndex, token);
+                return new Result<List<SimplificationDescription>>($"Syntax error for input '{token}'", errorIndex, token);
             }
 
-            var parseResult = tokensResult.Value.TryParse();
+            var grammar = new Grammar(settings); // inject
+            var parseResult = grammar.BuildTree(tokensResult.Value);
             if (!parseResult.HasValue)
             {
                 var errorIndex = GetErrorIndex(parseResult.ErrorPosition);
                 var token = parseResult.Remainder.ConsumeToken().Value.ToStringValue();
                 // use localized user error messages
-                return new Result<List<SiplificationDescription>>($"Syntax error for input '{token}'", errorIndex, token);
+                return new Result<List<SimplificationDescription>>($"Syntax error for input '{token}'", errorIndex, token);
             }
 
+            // work with errors
             var result = Evaluator.Evaluate(parseResult.Value);
-            return new Result<List<SiplificationDescription>>(result);
+            return new Result<List<SimplificationDescription>>(result);
         }
 
         static int GetErrorIndex(Position position)

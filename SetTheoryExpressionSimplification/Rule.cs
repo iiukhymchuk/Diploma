@@ -100,8 +100,9 @@ namespace SetTheory
             var settings = new DefaultSettings();
             var syntax = new Syntax(settings);
             var tokens = syntax.GetTokenizerWithVariables.TryTokenize(pattern);
-            var result = tokens.Value.TryParseRule();
-            return result.Value;
+            var grammar = new Grammar(settings);
+            var result = grammar.BuildTree(tokens.Value);
+            return result.Value.Children[0];
         }
     }
 }

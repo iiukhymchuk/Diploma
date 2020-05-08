@@ -7,22 +7,22 @@ namespace SetTheory
 {
     public class Evaluator
     {
-        public static List<SiplificationDescription> Evaluate(Expression expr)
+        public static List<SimplificationDescription> Evaluate(Expression expr)
         {
-            var lines = new List<SiplificationDescription>();
+            var lines = new List<SimplificationDescription>();
 
             var changed = true;
             while (changed)
             {
                 changed = false;
 
-                var (success, initial, substitution, resulting, description) = expr.DFSPostOrder2(x => ApplyRules(x, Rules));
+                var (success, initial, substitution, resulting, description) = expr.DFSPostOrder2(x => ApplyRules(x, new Rules()));
                 if (success)
                 {
                     changed = true;
                     var copy = Substitute(expr, initial, resulting);
                     expr = copy;
-                    lines.Add(new SiplificationDescription
+                    lines.Add(new SimplificationDescription
                     {
                         SimplifiedExpression = copy.ToString(),
                         AppliedRule = $"{substitution} => {resulting}",
@@ -48,7 +48,7 @@ namespace SetTheory
             }
         }
 
-        static (bool, Expression, Expression, string) ApplyRules(Expression expr, List<Rule> rules)
+        static (bool, Expression, Expression, string) ApplyRules(Expression expr, Rules rules)
         {
             foreach (var rule in rules)
             {
@@ -57,22 +57,5 @@ namespace SetTheory
             }
             return (false, null, null, null);
         }
-
-        public static List<Rule> Rules { get; } =
-            new List<Rule>
-            {
-                Rule.FromString("_A * _A = _A", "Indempodent rule"),
-                Rule.FromString("_A + _A = _A", "Indempodent rule"),
-                Rule.FromString("_A + U = U", "Domination rule"),
-                Rule.FromString("U + _A = U", "Domination rule"),
-                Rule.FromString("_A * O = O", "Domination rule"),
-                Rule.FromString("O * _A = O", "Domination rule"),
-                Rule.FromString("_A + O = _A", "Identity rule"),
-                Rule.FromString("O + _A = _A", "Identity rule"),
-                Rule.FromString("_A * U = _A", "Identity rule"),
-                Rule.FromString("U * _A = _A", "Identity rule"),
-                Rule.FromString("_A + _A' = U", "Complement rule"),
-                Rule.FromString("_A * _A' = O", "Complement rule"),
-            };
     }
 }

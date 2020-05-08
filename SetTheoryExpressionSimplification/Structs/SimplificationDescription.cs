@@ -1,6 +1,6 @@
 ﻿namespace SetTheory.Structs
 {
-    public class SiplificationDescription
+    public class SimplificationDescription
     {
         public string SimplifiedExpression { get; set; }
         public string AppliedRule { get; set; }

@@ -13,5 +13,12 @@
         char[] RParens { get; }
         char[] UniverseSets { get; }
         char[] EmptySets { get; }
+        string UniverseSign { get; }
+        string EmptySetSign { get; }
+        string PostfixNegation { get; }
+        string Union { get; }
+        string Intersection { get; }
+        string Difference { get; }
+        string SymmetricDifference { get; }
     }
 }

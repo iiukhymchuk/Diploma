@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SetTheory.Expressions
+namespace SetTheory.AST
 {
     public abstract class Expression
     {
@@ -28,7 +28,7 @@ namespace SetTheory.Expressions
             return (TExpression)Activator.CreateInstance(typeof(TExpression), value, children);
         }
 
-        public abstract override string ToString();
         public abstract Expression Copy();
+        public abstract override string ToString();
     }
 }

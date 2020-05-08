@@ -1,4 +1,4 @@
-﻿namespace SetTheory.Expressions
+﻿namespace SetTheory.AST
 {
     public class UnaryOperation : Expression
     {
@@ -13,6 +13,6 @@
         public override Expression[] Children { get; set; }
 
         public override Expression Copy() => Create<UnaryOperation>(this);
-        public override string ToString() => $"{Children[0].ToString()}{Value}";
+        public override string ToString() => $"{Children[0]}{Value}";
     }
 }

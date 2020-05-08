@@ -10,6 +10,14 @@ namespace Tests.SetTheory
     [TestClass]
     public class TryTokenizeFixture
     {
+        readonly Syntax syntax;
+
+        public TryTokenizeFixture()
+        {
+            var settings = new DefaultSettings();
+            syntax = new Syntax(settings);
+        }
+
         [DataTestMethod]
         [DataRow(" +∪∨| ")]
         [DataRow(" *∩∧& ")]
@@ -23,7 +31,7 @@ namespace Tests.SetTheory
         [DataRow(" ' ")]
         public void TokenizerReturnsResultOnValidInputPerLexema(string input)
         {
-            var result = input.TryTokenize();
+            var result = syntax.GetTokenizer.TryTokenize(input);
             Assert.IsTrue(result.HasValue);
         }
 
@@ -40,7 +48,7 @@ namespace Tests.SetTheory
         [DataRow(@"  +  *  E  U  O  \  (  )  !  '  ")]
         public void TokenizerReturnsResultOnValidInput(string input)
         {
-            var result = input.TryTokenize();
+            var result = syntax.GetTokenizer.TryTokenize(input);
             Assert.IsTrue(result.HasValue);
         }
 
@@ -51,7 +59,7 @@ namespace Tests.SetTheory
         [DataRow("%")]
         public void TokenizerReturnsErrorOnInvalidInput(string input)
         {
-            var result = input.TryTokenize();
+            var result = syntax.GetTokenizer.TryTokenize(input);
             Assert.IsFalse(result.HasValue);
             Assert.AreEqual(Position.Zero, result.ErrorPosition);
         }
@@ -80,7 +88,7 @@ namespace Tests.SetTheory
                 TokenType.Union,
                 TokenType.EmptySet
             };
-            var result = input.TryTokenize();
+            var result = syntax.GetTokenizer.TryTokenize(input);
             var actual = result.Value.Select(x => x.Kind).ToList();
             CollectionAssert.AreEqual(expected, actual);
         }

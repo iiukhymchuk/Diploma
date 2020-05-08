@@ -5,26 +5,34 @@ using Superpower.Tokenizers;
 
 namespace SetTheory
 {
-    public static class Syntax
+    public class Syntax
     {
-        static TokenizerBuilder<TokenType> SyntaxBuilder { get; } = new TokenizerBuilder<TokenType>()
-            .Ignore(Span.WhiteSpace)
-            .Match(Character.In('A', 'B', 'C', 'D', 'E'), TokenType.Set)
-            .Match(Character.In('∪', '+', '∨', '|'), TokenType.Union)
-            .Match(Character.In('∩', '*', '∧', '&'), TokenType.Intersection)
-            .Match(Character.In('\\', '-'), TokenType.Difference)
-            .Match(Character.In('△', '⊖'), TokenType.SymmetricDifference)
-            .Match(Character.EqualTo('!'), TokenType.PrefixNegation)
-            .Match(Character.EqualTo('\''), TokenType.PostfixNegation)
-            .Match(Character.EqualTo('('), TokenType.LParen)
-            .Match(Character.EqualTo(')'), TokenType.RParen)
-            .Match(Character.In('U', '1'), TokenType.UniverseSet)
-            .Match(Character.In('O', '0', '∅'), TokenType.EmptySet);
+        readonly TokenizerBuilder<TokenType> syntaxBuilder;
 
-        public static Tokenizer<TokenType> Main { get; } = SyntaxBuilder.Build();
+        public Syntax(ISettings settings)
+        {
+            syntaxBuilder = CreateSyntaxBuilder(settings, new DefaultSettings());
+        }
 
-        public static Tokenizer<TokenType> WithVariables { get; } =
-            SyntaxBuilder
+        TokenizerBuilder<TokenType> CreateSyntaxBuilder(ISettings settings, ISettings defaultSettings) =>
+            new TokenizerBuilder<TokenType>()
+                .Ignore(Span.WhiteSpace)
+                .Match(Character.In(settings.Sets ?? defaultSettings.Sets), TokenType.Set)
+                .Match(Character.In(settings.Unions ?? defaultSettings.Unions), TokenType.Union)
+                .Match(Character.In(settings.Intersections ?? defaultSettings.Intersections), TokenType.Intersection)
+                .Match(Character.In(settings.Differences ?? defaultSettings.Differences), TokenType.Difference)
+                .Match(Character.In(settings.SymmetricDifferences ?? defaultSettings.SymmetricDifferences), TokenType.SymmetricDifference)
+                .Match(Character.In(settings.PrefixNegations ?? defaultSettings.PrefixNegations), TokenType.PrefixNegation)
+                .Match(Character.In(settings.PostfixNegations ?? defaultSettings.PostfixNegations), TokenType.PostfixNegation)
+                .Match(Character.In(settings.LParens ?? defaultSettings.LParens), TokenType.LParen)
+                .Match(Character.In(settings.RParens ?? defaultSettings.RParens), TokenType.RParen)
+                .Match(Character.In(settings.UniverseSets ?? defaultSettings.UniverseSets), TokenType.UniverseSet)
+                .Match(Character.In(settings.EmptySets ?? defaultSettings.EmptySets), TokenType.EmptySet);
+
+        public Tokenizer<TokenType> GetTokenizer => syntaxBuilder.Build();
+
+        public Tokenizer<TokenType> GetTokenizerWithVariables =>
+            syntaxBuilder
             .Match(Span.Regex("_[A-E]"), TokenType.Variable)
             .Build();
     }

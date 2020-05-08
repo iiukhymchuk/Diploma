@@ -1,4 +1,4 @@
-﻿using SetTheory.Expressions;
+﻿using SetTheory.AST;
 using SetTheory.Structs;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,7 +25,7 @@ namespace SetTheory
                     lines.Add(new SiplificationDescription
                     {
                         SimplifiedExpression = copy.ToString(),
-                        AppliedRule = $"{substitution.ToString()} => {resulting.ToString()}",
+                        AppliedRule = $"{substitution} => {resulting}",
                         RuleDescription = description
                     });
                 }

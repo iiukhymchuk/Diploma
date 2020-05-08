@@ -9,7 +9,9 @@ namespace SetTheory
     {
         public static Result<List<SiplificationDescription>> Process(string input)
         {
-            var tokensResult = input.TryTokenize();
+            var settings = new DefaultSettings();
+            var syntax = new Syntax(settings);
+            var tokensResult = syntax.GetTokenizer.TryTokenize(input);
             if (!tokensResult.HasValue)
             {
                 var errorIndex = GetErrorIndex(tokensResult.ErrorPosition);
@@ -34,8 +36,8 @@ namespace SetTheory
         static int GetErrorIndex(Position position)
         {
             return position.HasValue && position.Line == 1
-                    ? position.Column - 1
-                    : -1;
+                ? position.Column - 1
+                : -1;
         }
     }
 }

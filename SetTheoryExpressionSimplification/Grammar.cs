@@ -1,4 +1,4 @@
-﻿using SetTheory.Expressions;
+﻿using SetTheory.AST;
 using SetTheory.Structs;
 using Superpower;
 using Superpower.Parsers;
@@ -63,6 +63,6 @@ namespace SetTheory
         public static ExpressionParser Expr { get; } =
             Parse.Chain(Union.Try().Or(Intersection).Try().Or(Difference).Try().Or(SymmetricDifference), Term, CreateExpr);
 
-        public static ExpressionParser Tree { get; } = Expr.AtEnd().Select(x => Expression.Create<Root>("Root", x));
+        public static ExpressionParser Tree { get; } = Expr.AtEnd().Select(x => Expression.Create<Tree>("Tree", x));
     }
 }

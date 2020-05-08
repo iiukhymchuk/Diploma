@@ -1,8 +1,8 @@
-﻿namespace SetTheory.Expressions
+﻿namespace SetTheory.AST
 {
-    public class Set : Expression
+    public class Variable : Expression
     {
-        public Set(string value, Expression[] children)
+        public Variable(string value, Expression[] children)
             : base(value, children)
         {
             Value = value;
@@ -12,7 +12,7 @@
         public override string Value { get; }
         public override Expression[] Children { get; set; }
 
-        public override Expression Copy() => Create<Set>(this);
+        public override Expression Copy() => Create<Variable>(this);
         public override string ToString() => Value;
     }
 }

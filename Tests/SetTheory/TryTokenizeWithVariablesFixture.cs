@@ -10,6 +10,14 @@ namespace Tests.SetTheory
     [TestClass]
     public class TryTokenizeWithVariablesFixture
     {
+        readonly Syntax syntax;
+
+        public TryTokenizeWithVariablesFixture()
+        {
+            var settings = new DefaultSettings();
+            syntax = new Syntax(settings);
+        }
+
         [DataTestMethod]
         [DataRow(" +∪∨| ")]
         [DataRow(" *∩∧& ")]
@@ -23,7 +31,7 @@ namespace Tests.SetTheory
         [DataRow(" ' ")]
         public void TokenizerReturnsResultOnValidInputPerLexema(string input)
         {
-            var result = input.TryTokenizeWithVariables();
+            var result = syntax.GetTokenizerWithVariables.TryTokenize(input);
             Assert.IsTrue(result.HasValue);
         }
 
@@ -40,7 +48,7 @@ namespace Tests.SetTheory
         [DataRow(@"  +  *  E  U  O  \  (  )  !  '  _E  ")]
         public void TokenizerReturnsResultOnValidInput(string input)
         {
-            var result = input.TryTokenizeWithVariables();
+            var result = syntax.GetTokenizerWithVariables.TryTokenize(input);
             Assert.IsTrue(result.HasValue);
         }
 
@@ -51,7 +59,7 @@ namespace Tests.SetTheory
         [DataRow("%")]
         public void TokenizerReturnsErrorOnInvalidInput(string input)
         {
-            var result = input.TryTokenizeWithVariables();
+            var result = syntax.GetTokenizerWithVariables.TryTokenize(input);
             Assert.IsFalse(result.HasValue);
             Assert.AreEqual(Position.Zero, result.ErrorPosition);
         }
@@ -82,7 +90,7 @@ namespace Tests.SetTheory
                 TokenType.Difference,
                 TokenType.Variable
             };
-            var result = input.TryTokenizeWithVariables();
+            var result = syntax.GetTokenizerWithVariables.TryTokenize(input);
             var actual = result.Value.Select(x => x.Kind).ToList();
             CollectionAssert.AreEqual(expected, actual);
         }

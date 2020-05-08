@@ -1,4 +1,4 @@
-﻿using SetTheory.Expressions;
+﻿using SetTheory.AST;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -97,7 +97,9 @@ namespace SetTheory
         static Expression Parse(string pattern)
         {
             // handle errors
-            var tokens = pattern.TryTokenizeWithVariables();
+            var settings = new DefaultSettings();
+            var syntax = new Syntax(settings);
+            var tokens = syntax.GetTokenizerWithVariables.TryTokenize(pattern);
             var result = tokens.Value.TryParseRule();
             return result.Value;
         }

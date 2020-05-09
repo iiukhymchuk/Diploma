@@ -1,6 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SetTheory;
-using SetTheory.Structs;
 using Superpower.Model;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,11 +7,11 @@ using System.Linq;
 namespace Tests.SetTheory
 {
     [TestClass]
-    public class TryTokenizeFixture
+    public class SyntaxFixture
     {
-        readonly Syntax syntax;
+        readonly IProvideTokenizer syntax;
 
-        public TryTokenizeFixture()
+        public SyntaxFixture()
         {
             var settings = new DefaultSettings();
             syntax = new Syntax(settings);
@@ -31,7 +30,7 @@ namespace Tests.SetTheory
         [DataRow(" ' ")]
         public void TokenizerReturnsResultOnValidInputPerLexema(string input)
         {
-            var result = syntax.GetTokenizer.TryTokenize(input);
+            var result = syntax.GetTokenizer().TryTokenize(input);
             Assert.IsTrue(result.HasValue);
         }
 
@@ -48,7 +47,7 @@ namespace Tests.SetTheory
         [DataRow(@"  +  *  E  U  O  \  (  )  !  '  ")]
         public void TokenizerReturnsResultOnValidInput(string input)
         {
-            var result = syntax.GetTokenizer.TryTokenize(input);
+            var result = syntax.GetTokenizer().TryTokenize(input);
             Assert.IsTrue(result.HasValue);
         }
 
@@ -59,7 +58,7 @@ namespace Tests.SetTheory
         [DataRow("%")]
         public void TokenizerReturnsErrorOnInvalidInput(string input)
         {
-            var result = syntax.GetTokenizer.TryTokenize(input);
+            var result = syntax.GetTokenizer().TryTokenize(input);
             Assert.IsFalse(result.HasValue);
             Assert.AreEqual(Position.Zero, result.ErrorPosition);
         }
@@ -88,7 +87,7 @@ namespace Tests.SetTheory
                 TokenType.Union,
                 TokenType.EmptySet
             };
-            var result = syntax.GetTokenizer.TryTokenize(input);
+            var result = syntax.GetTokenizer().TryTokenize(input);
             var actual = result.Value.Select(x => x.Kind).ToList();
             CollectionAssert.AreEqual(expected, actual);
         }

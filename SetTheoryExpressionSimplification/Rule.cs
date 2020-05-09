@@ -1,5 +1,4 @@
-﻿using SetTheory.AST;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace SetTheory
@@ -98,8 +97,9 @@ namespace SetTheory
         {
             // handle errors
             var settings = new DefaultSettings();
-            var syntax = new Syntax(settings);
-            var tokens = syntax.GetTokenizerWithVariables.TryTokenize(pattern);
+            IProvideTokenizer syntax = new SyntaxWithVariables(settings);
+            var tokenizer = syntax.GetTokenizer();
+            var tokens = tokenizer.TryTokenize(pattern);
             var grammar = new Grammar(settings);
             var result = grammar.BuildTree(tokens.Value);
             return result.Value.Children[0];

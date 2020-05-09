@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SetTheory.AST
+namespace SetTheory
 {
     public abstract class Expression
     {

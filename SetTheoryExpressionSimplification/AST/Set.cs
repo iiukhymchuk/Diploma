@@ -1,4 +1,4 @@
-﻿namespace SetTheory.AST
+﻿namespace SetTheory
 {
     public class Set : Expression
     {

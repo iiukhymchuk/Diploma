@@ -1,4 +1,4 @@
-﻿namespace SetTheory.Structs
+﻿namespace SetTheory
 {
     public class SimplificationDescription
     {

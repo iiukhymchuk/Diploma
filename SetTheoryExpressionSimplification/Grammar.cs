@@ -1,6 +1,4 @@
-﻿using SetTheory.AST;
-using SetTheory.Structs;
-using Superpower;
+﻿using Superpower;
 using Superpower.Parsers;
 using System;
 

@@ -1,6 +1,4 @@
-﻿using SetTheory.AST;
-using SetTheory.Structs;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace SetTheory

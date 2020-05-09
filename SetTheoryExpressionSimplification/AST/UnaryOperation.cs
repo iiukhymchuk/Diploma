@@ -1,4 +1,4 @@
-﻿namespace SetTheory.AST
+﻿namespace SetTheory
 {
     public class UnaryOperation : Expression
     {

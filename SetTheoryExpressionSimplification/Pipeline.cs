@@ -3,16 +3,15 @@ using System.Collections.Generic;
 
 namespace SetTheory
 {
-    using SetTheory.Structs;
-
     public class Pipeline
     {
         public static Result<List<SimplificationDescription>> Process(string input)
         {
             var settings = new DefaultSettings(); // get settings from outside, not default
 
-            var syntax = new Syntax(settings); // inject
-            var tokensResult = syntax.GetTokenizer.TryTokenize(input);
+            IProvideTokenizer syntax = new Syntax(settings); // inject
+            var tokenizer = syntax.GetTokenizer();
+            var tokensResult = tokenizer.TryTokenize(input);
             if (!tokensResult.HasValue)
             {
                 var errorIndex = GetErrorIndex(tokensResult.ErrorPosition);

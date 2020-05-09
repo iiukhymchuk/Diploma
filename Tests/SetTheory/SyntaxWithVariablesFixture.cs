@@ -1,6 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SetTheory;
-using SetTheory.Structs;
 using Superpower.Model;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,14 +7,14 @@ using System.Linq;
 namespace Tests.SetTheory
 {
     [TestClass]
-    public class TryTokenizeWithVariablesFixture
+    public class SyntaxWithVariablesFixture
     {
-        readonly Syntax syntax;
+        readonly IProvideTokenizer syntax;
 
-        public TryTokenizeWithVariablesFixture()
+        public SyntaxWithVariablesFixture()
         {
             var settings = new DefaultSettings();
-            syntax = new Syntax(settings);
+            syntax = new SyntaxWithVariables(settings);
         }
 
         [DataTestMethod]
@@ -31,7 +30,7 @@ namespace Tests.SetTheory
         [DataRow(" ' ")]
         public void TokenizerReturnsResultOnValidInputPerLexema(string input)
         {
-            var result = syntax.GetTokenizerWithVariables.TryTokenize(input);
+            var result = syntax.GetTokenizer().TryTokenize(input);
             Assert.IsTrue(result.HasValue);
         }
 
@@ -48,7 +47,7 @@ namespace Tests.SetTheory
         [DataRow(@"  +  *  E  U  O  \  (  )  !  '  _E  ")]
         public void TokenizerReturnsResultOnValidInput(string input)
         {
-            var result = syntax.GetTokenizerWithVariables.TryTokenize(input);
+            var result = syntax.GetTokenizer().TryTokenize(input);
             Assert.IsTrue(result.HasValue);
         }
 
@@ -59,7 +58,7 @@ namespace Tests.SetTheory
         [DataRow("%")]
         public void TokenizerReturnsErrorOnInvalidInput(string input)
         {
-            var result = syntax.GetTokenizerWithVariables.TryTokenize(input);
+            var result = syntax.GetTokenizer().TryTokenize(input);
             Assert.IsFalse(result.HasValue);
             Assert.AreEqual(Position.Zero, result.ErrorPosition);
         }
@@ -90,7 +89,7 @@ namespace Tests.SetTheory
                 TokenType.Difference,
                 TokenType.Variable
             };
-            var result = syntax.GetTokenizerWithVariables.TryTokenize(input);
+            var result = syntax.GetTokenizer().TryTokenize(input);
             var actual = result.Value.Select(x => x.Kind).ToList();
             CollectionAssert.AreEqual(expected, actual);
         }

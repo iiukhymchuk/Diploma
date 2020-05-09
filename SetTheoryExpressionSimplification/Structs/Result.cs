@@ -2,6 +2,8 @@
 {
     public class Result<T>
     {
+        static readonly Result<T> empty = new Result<T>();
+
         public Result(T value)
         {
             Value = value;
@@ -15,6 +17,13 @@
             Token = token;
             HasValue = false;
         }
+
+        Result()
+        {
+            HasValue = false;
+        }
+
+        public static Result<T> Empty() => empty;
 
         public bool HasValue { get; }
         public T Value { get; }

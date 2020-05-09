@@ -31,7 +31,7 @@ namespace SetTheory
             }
 
             // work with errors
-            var result = Interpretor.Evaluate(parseResult.Value);
+            var result = new Interpreter(new PatternMatcher(), new Normalizer()).Interpretate((Tree)parseResult.Value);
             return new Result<List<SimplificationDescription>>(result);
         }
 

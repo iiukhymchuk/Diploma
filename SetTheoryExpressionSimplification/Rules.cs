@@ -22,13 +22,17 @@ namespace SetTheory
                 new Rule("_A * _A' = O", "Complement rule"),
                 new Rule("O' = U", "Complement rule"),
                 new Rule("U' = O", "Complement rule"),
-                new Rule("_A + (_A * _B)' = _A", "Absorption rule"),
+                new Rule("_A + (_A * _B) = _A", "Absorption rule"),
+                new Rule("_A + (_B * _A) = _A", "Absorption rule"),
                 new Rule("_A * (_A + _B) = _A", "Absorption rule"),
+                new Rule("_A * (_B + _A) = _A", "Absorption rule"),
                 new Rule("(_A * _B) + _A = _A", "Absorption rule"),
+                new Rule("(_B * _A) + _A = _A", "Absorption rule"),
                 new Rule("(_A + _B) * _A = _A", "Absorption rule"),
+                new Rule("(_B + _A) * _A = _A", "Absorption rule"),
                 new Rule("_A'' = _A", "Involution rule"),
-                new Rule("(_A + _B)' = _A' * _B'", "De Morgan's rule"),
-                new Rule("(_A * _B)' = _A' + _B'", "De Morgan's rule"),
+                new Rule("(_A + _B)' = (_A' * _B')", "De Morgan's rule"),
+                new Rule("(_A * _B)' = (_A' + _B')", "De Morgan's rule"),
             };
 
         public IEnumerator<Rule> GetEnumerator()

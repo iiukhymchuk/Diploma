@@ -11,7 +11,7 @@
         public override string Value { get; }
         public override Expression[] Children { get; set; }
 
-        public override Expression Copy() => new Tree(Value, Children[0]);
+        public override Expression Copy() => new Tree(Value, Children[0].Copy());
         public override string ToString() => $"{Children[0]}";
     }
 }

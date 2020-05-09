@@ -26,7 +26,7 @@ namespace SetTheory
             var dict = new Dictionary<string, Expression>();
             if (Match(expr, rule.PatternIn, ref dict))
             {
-                var copy = DeepCopy(rule.PatternOut);
+                var copy = rule.PatternOut.Copy();
                 var expr2 = Substitute(copy, dict);
                 var value = new Substitution
                 {
@@ -70,13 +70,6 @@ namespace SetTheory
 
                 vars[pattern.Value] = expr;
                 return true;
-            }
-
-            static Expression DeepCopy(Expression result)
-            {
-                var copy = result.Copy();
-                copy.DFSPostOrder(x => x.Children = x.Children.Select(y => y.Copy()).ToArray());
-                return copy;
             }
 
             static Expression Substitute(Expression result, Dictionary<string, Expression> dict)

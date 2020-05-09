@@ -32,6 +32,7 @@ namespace SetTheory
             var isPrefixNegation = settings.IsPrefixNegation || defaultSettings.IsPrefixNegation;
             var prefixNegationSign = settings.PrefixNegation ?? defaultSettings.PrefixNegation;
             var postfixNegationSign = settings.PostfixNegation ?? defaultSettings.PostfixNegation;
+            var negationSign = isPrefixNegation ? prefixNegationSign : postfixNegationSign;
             var unionSign = settings.Union ?? defaultSettings.Union;
             var intersectionSign = settings.Intersection ?? defaultSettings.Intersection;
             var differenceSign = settings.Difference ?? defaultSettings.Difference;
@@ -50,19 +51,15 @@ namespace SetTheory
                .Or(UniverseSet).Try()
                .Or(EmptySet).Try()
                .Or(Variable).Try()
-               .Or(ExpressionInParens);
+               .Or(ExpressionInParens).Try();
             PrefixNegation =
-                from token in Token.EqualTo(TokenType.PrefixNegation)
-                from factor in Factor
-                select (Expression)(isPrefixNegation
-                    ? new NegationOperation(prefixNegationSign, factor, true)
-                    : new NegationOperation(postfixNegationSign, factor));
+                from tokens in Token.EqualTo(TokenType.PrefixNegation).AtLeastOnce()
+                from expr in Parse.Ref(() => Expr)
+                select CreateNegationOperation(negationSign, isPrefixNegation, expr, tokens.Length);
             PostfixNegation =
                 from factor in Factor
-                from token in Token.EqualTo(TokenType.PostfixNegation)
-                select (Expression)(isPrefixNegation
-                    ? new NegationOperation(prefixNegationSign, factor, true)
-                    : new NegationOperation(postfixNegationSign, factor)); ;
+                from tokens in Token.EqualTo(TokenType.PostfixNegation).AtLeastOnce()
+                select CreateNegationOperation(negationSign, isPrefixNegation, factor, tokens.Length);
             Term = PostfixNegation.Try().Or(PrefixNegation).Try().Or(Factor);
             Union = Token.EqualTo(TokenType.Union).Select(_ => unionSign);
             Intersection = Token.EqualTo(TokenType.Intersection).Select(_ => intersectionSign);
@@ -72,6 +69,18 @@ namespace SetTheory
                 Union.Try().Or(Intersection).Try().Or(Difference).Try().Or(SymmetricDifference),
                 Term,
                 CreateBinaryOperation());
+        }
+
+        Expression CreateNegationOperation(string value, bool isPrefix, Expression expression, int count)
+        {
+            if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
+
+            var negation = new NegationOperation(value, expression, isPrefix);
+
+            if (count == 1)
+                return negation;
+
+            return CreateNegationOperation(value, isPrefix, negation, --count);
         }
 
         Func<string, Expression, Expression, Expression> CreateBinaryOperation()

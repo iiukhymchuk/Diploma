@@ -38,7 +38,7 @@ namespace SetTheory
                     lines.Add(new SimplificationDescription
                     {
                         SimplifiedExpression = copy.ToString(),
-                        AppliedRule = $"{result.Value.Matched} => {result.Value.Resulting}",
+                        AppliedRule = $"{result.Value.Initial} => {result.Value.Resulting}",
                         RuleDescription = result.Value.Description
                     });
                 }

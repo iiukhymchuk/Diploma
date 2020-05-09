@@ -42,14 +42,7 @@ namespace SetTheory
                     return childResult;
             }
 
-            var result = func.Invoke(graph);
-            if (result.HasValue)
-            {
-                result.Value.Initial = graph;
-                return result;
-            }
-
-            return Result<Substitution>.Empty();
+            return func.Invoke(graph);
         }
     }
 }

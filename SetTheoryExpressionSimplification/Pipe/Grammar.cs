@@ -29,21 +29,23 @@ namespace SetTheory
 
             var universeSign = settings.UniverseSign ?? defaultSettings.UniverseSign;
             var emptySetSign = settings.EmptySetSign ?? defaultSettings.EmptySetSign;
+            var isPrefixNegation = settings.IsPrefixNegation || defaultSettings.IsPrefixNegation;
+            var prefixNegationSign = settings.PrefixNegation ?? defaultSettings.PrefixNegation;
             var postfixNegationSign = settings.PostfixNegation ?? defaultSettings.PostfixNegation;
             var unionSign = settings.Union ?? defaultSettings.Union;
             var intersectionSign = settings.Intersection ?? defaultSettings.Intersection;
             var differenceSign = settings.Difference ?? defaultSettings.Difference;
             var symmetricDifferenceSign = settings.SymmetricDifference ?? defaultSettings.SymmetricDifference;
 
-            Set = Token.EqualTo(TokenType.Set).Select(x => Expression.Create<Set>(x.ToStringValue()));
-            UniverseSet = Token.EqualTo(TokenType.UniverseSet).Select(_ => Expression.Create<Set>(universeSign));
-            EmptySet = Token.EqualTo(TokenType.EmptySet).Select(_ => Expression.Create<Set>(emptySetSign));
-            Variable = Token.EqualTo(TokenType.Variable).Select(x => Expression.Create<Variable>(x.ToStringValue()));
+            Set = Token.EqualTo(TokenType.Set).Select(x => (Expression)new Set(x.ToStringValue()));
+            UniverseSet = Token.EqualTo(TokenType.UniverseSet).Select(_ => (Expression)new Set(universeSign));
+            EmptySet = Token.EqualTo(TokenType.EmptySet).Select(_ => (Expression)new Set(emptySetSign));
+            Variable = Token.EqualTo(TokenType.Variable).Select(x => (Expression)new Variable(x.ToStringValue()));
             ExpressionInParens =
                 from lparen in Token.EqualTo(TokenType.LParen)
                 from expr in Parse.Ref(() => Expr)
                 from rparen in Token.EqualTo(TokenType.RParen)
-                select expr;
+                select (Expression)new Parens("()", expr);
             Factor = Set.Try()
                .Or(UniverseSet).Try()
                .Or(EmptySet).Try()
@@ -52,11 +54,15 @@ namespace SetTheory
             PrefixNegation =
                 from token in Token.EqualTo(TokenType.PrefixNegation)
                 from factor in Factor
-                select Expression.Create<UnaryOperation>(postfixNegationSign, factor);
+                select (Expression)(isPrefixNegation
+                    ? new NegationOperation(prefixNegationSign, factor, true)
+                    : new NegationOperation(postfixNegationSign, factor));
             PostfixNegation =
                 from factor in Factor
                 from token in Token.EqualTo(TokenType.PostfixNegation)
-                select Expression.Create<UnaryOperation>(postfixNegationSign, factor);
+                select (Expression)(isPrefixNegation
+                    ? new NegationOperation(prefixNegationSign, factor, true)
+                    : new NegationOperation(postfixNegationSign, factor)); ;
             Term = PostfixNegation.Try().Or(PrefixNegation).Try().Or(Factor);
             Union = Token.EqualTo(TokenType.Union).Select(_ => unionSign);
             Intersection = Token.EqualTo(TokenType.Intersection).Select(_ => intersectionSign);
@@ -69,8 +75,8 @@ namespace SetTheory
         }
 
         Func<string, Expression, Expression, Expression> CreateBinaryOperation()
-            => (value, child1, child2) => Expression.Create<BinaryOperation>(value, child1, child2);
+            => (value, child1, child2) => new BinaryOperation(value, child1, child2);
 
-        public ExpressionParser BuildTree => Expr.AtEnd().Select(x => Expression.Create<Tree>("Tree", x));
+        public ExpressionParser BuildTree => Expr.AtEnd().Select(x => (Expression) new Tree("Tree", x));
     }
 }

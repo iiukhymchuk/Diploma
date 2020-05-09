@@ -15,7 +15,9 @@
         char[] EmptySets { get; }
         string UniverseSign { get; }
         string EmptySetSign { get; }
+        bool IsPrefixNegation { get; }
         string PostfixNegation { get; }
+        string PrefixNegation { get; }
         string Union { get; }
         string Intersection { get; }
         string Difference { get; }

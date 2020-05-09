@@ -26,7 +26,7 @@ namespace SetTheory
                 // normalize expression
                 var normalizedExpr = normalizer.Normalize(expr);
 
-                // evaluate expression
+                // match expression
                 var result = patternMatcher.Match(normalizedExpr);
 
                 // print
@@ -49,7 +49,7 @@ namespace SetTheory
 
         static Tree ApplyPattern(Tree expr, Expression initial, Expression resulting)
         {
-            var tree = new Tree("Tree", expr.Children);
+            var tree = (Tree) expr.Copy();
             tree.DFSPostOrder(
                 x => x.Children = x.Children.Select(y => Expression.ExprEquals(y, initial) ? resulting : y).ToArray());
             return tree;

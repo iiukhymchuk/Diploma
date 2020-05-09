@@ -8,6 +8,7 @@ namespace SetTheory
         public static Result<List<SimplificationDescription>> Process(string input)
         {
             var settings = new DefaultSettings(); // get settings from outside, not default
+            var rules = new Rules();
 
             IProvideTokenizer syntax = new Syntax(settings); // inject
             var tokenizer = syntax.GetTokenizer();
@@ -31,7 +32,8 @@ namespace SetTheory
             }
 
             // work with errors
-            var result = new Interpreter(new PatternMatcher(), new Normalizer()).Interpretate((Tree)parseResult.Value);
+            var interpreter = new Interpreter(new PatternMatcher(rules.GetRules()), new Normalizer(rules.GetNormalizationRules()));
+            var result = interpreter.Interpretate((Tree)parseResult.Value);
             return new Result<List<SimplificationDescription>>(result);
         }
 

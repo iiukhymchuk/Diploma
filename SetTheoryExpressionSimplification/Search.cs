@@ -6,43 +6,43 @@ namespace SetTheory
     public static class Search
     {
         public static void DFSPostOrder(
-            this Expression graph,
+            this Expression current,
             Action<Expression> action,
             HashSet<Expression> visited = null)
         {
             visited ??= new HashSet<Expression>();
-            if (visited.Contains(graph))
+            if (visited.Contains(current))
                 return;
 
-            visited.Add(graph);
+            visited.Add(current);
 
-            foreach (var child in graph.Children)
+            foreach (var child in current.Children)
             {
                 child.DFSPostOrder(action, visited);
             }
 
-            action?.Invoke(graph);
+            action?.Invoke(current);
         }
 
         public static Result<Substitution> DFSPostOrder(
-            this Expression graph,
+            this Expression current,
             Func<Expression, Result<Substitution>> func,
             HashSet<Expression> visited = null)
         {
             visited ??= new HashSet<Expression>();
-            if (visited.Contains(graph))
+            if (visited.Contains(current))
                 return Result<Substitution>.Empty();
 
-            visited.Add(graph);
+            visited.Add(current);
 
-            foreach (var child in graph.Children)
+            foreach (var child in current.Children)
             {
                 var childResult = child.DFSPostOrder(func, visited);
                 if (childResult.HasValue)
                     return childResult;
             }
 
-            return func.Invoke(graph);
+            return func.Invoke(current);
         }
     }
 }

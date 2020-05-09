@@ -7,17 +7,18 @@ namespace Tests.SetTheory
     [TestClass]
     public class InterpreterFixture
     {
-        Interpreter interpeter;
-        IProvideTokenizer syntax;
-        Grammar grammar;
-        ISettings settings;
+        readonly Interpreter interpeter;
+        readonly IProvideTokenizer syntax;
+        readonly Grammar grammar;
+        readonly ISettings settings;
 
         public InterpreterFixture()
         {
             settings = new DefaultSettings();
+            var rules = new Rules();
             syntax = new Syntax(settings);
             grammar = new Grammar(settings);
-            interpeter = new Interpreter(new PatternMatcher(), new Normalizer());
+            interpeter = new Interpreter(new PatternMatcher(rules.GetRules()), new Normalizer(rules.GetNormalizationRules()));
         }
 
         [DataTestMethod]

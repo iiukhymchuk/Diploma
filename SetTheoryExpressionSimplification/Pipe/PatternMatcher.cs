@@ -5,16 +5,18 @@ namespace SetTheory
 {
     class PatternMatcher
     {
-        internal Result<Substitution> Match(Expression expr)
+        readonly List<Rule> rules;
+
+        public PatternMatcher(List<Rule> rules)
         {
-            return expr.DFSPostOrder(x => ApplyRules(x, new Rules()));
+            this.rules = rules;
         }
 
-        static Result<Substitution> ApplyRules(Expression expr, Rules rules)
+        internal Result<Substitution> Match(Expression expr)
         {
             foreach (var rule in rules)
             {
-                var result = ApplyRule(expr, rule);
+                var result = expr.DFSPostOrder(x => ApplyRule(x, rule));
                 if (result.HasValue)
                     return result;
             }

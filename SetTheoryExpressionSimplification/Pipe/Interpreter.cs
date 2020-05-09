@@ -18,33 +18,26 @@ namespace SetTheory
         {
             var lines = new List<SimplificationDescription>();
 
-            var changed = true;
-            while (changed)
+            while (true)
             {
-                changed = false;
-
                 // normalize expression
-                var normalizedExpr = normalizer.Normalize(expr);
+                expr = normalizer.Normalize(expr);
 
                 // match expression
-                var result = patternMatcher.Match(normalizedExpr);
+                var result = patternMatcher.Match(expr);
+
+                if (!result.HasValue)
+                    return lines;
 
                 // print
-                if (result.HasValue)
+                expr = ApplyPattern(expr, result.Value.Initial, result.Value.Resulting);
+                lines.Add(new SimplificationDescription
                 {
-                    changed = true;
-                    var copy = ApplyPattern(normalizedExpr, result.Value.Initial, result.Value.Resulting);
-                    expr = copy;
-                    lines.Add(new SimplificationDescription
-                    {
-                        SimplifiedExpression = copy.ToString(),
-                        AppliedRule = $"{result.Value.Initial} => {result.Value.Resulting}",
-                        RuleDescription = result.Value.Description
-                    });
-                }
+                    SimplifiedExpression = expr.ToString(),
+                    AppliedRule = $"{result.Value.Initial} => {result.Value.Resulting}",
+                    RuleDescription = result.Value.Description
+                });
             }
-
-            return lines;
         }
 
         static Tree ApplyPattern(Tree expr, Expression initial, Expression resulting)

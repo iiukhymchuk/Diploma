@@ -6,9 +6,9 @@ namespace SetTheory
 {
     public static class ExpressionUtils
     {
-        public static void DFSPostOrder(
+        public static void DFSPostOrder<T>(
             this Expression graph,
-            Action<Expression[]> actionOnChildren,
+            Action<T> action,
             HashSet<Expression> visited = null)
         {
             visited ??= new HashSet<Expression>();
@@ -19,10 +19,29 @@ namespace SetTheory
 
             foreach (var child in graph.Children)
             {
-                graph.DFSPostOrder(actionOnChildren, visited);
+                graph.DFSPostOrder<T>(action, visited);
             }
 
-            actionOnChildren?.Invoke(graph.Children);
+            action?.Invoke((T)(object)graph.Children);
+        }
+
+        public static void DFSPostOrder(
+            this Expression graph,
+            Action<Expression> action,
+            HashSet<Expression> visited = null)
+        {
+            visited ??= new HashSet<Expression>();
+            if (visited.Contains(graph))
+                return;
+
+            visited.Add(graph);
+
+            foreach (var child in graph.Children)
+            {
+                graph.DFSPostOrder(action, visited);
+            }
+
+            action?.Invoke(graph);
         }
 
         // it is not Post order, rewrite
@@ -32,6 +51,7 @@ namespace SetTheory
         {
             var visited = new HashSet<Expression>();
             var stack = new Stack<Expression>();
+
             stack.Push(graph);
 
             while (stack.Count > 0)
@@ -49,9 +69,7 @@ namespace SetTheory
 
                 var (success, substitution, resulting, description) = action.Invoke(vertex);
                 if (success)
-                {
                     return (success, vertex, substitution, resulting, description);
-                }
             }
 
             return (false, null, null, null, null);

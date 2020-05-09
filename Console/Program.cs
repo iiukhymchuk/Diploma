@@ -85,16 +85,16 @@ namespace ConsoleApp
             WriteInColor(message, ConsoleColor.Red);
         }
 
+        static void WriteDescription()
+        {
+            WriteInColor("Please, provide the set theory expression", ConsoleColor.Red);
+        }
+
         static void WriteInColor(string message, ConsoleColor color)
         {
             Console.ForegroundColor = color;
             Console.WriteLine(message);
             Console.ResetColor();
-        }
-
-        static void WriteDescription()
-        {
-            throw new NotImplementedException();
         }
     }
 }

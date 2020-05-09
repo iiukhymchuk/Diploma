@@ -31,7 +31,7 @@ namespace SetTheory
             }
 
             // work with errors
-            var result = Evaluator.Evaluate(parseResult.Value);
+            var result = Interpretor.Evaluate(parseResult.Value);
             return new Result<List<SimplificationDescription>>(result);
         }
 

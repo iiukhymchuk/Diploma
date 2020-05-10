@@ -8,11 +8,11 @@ namespace SetTheory
 
         internal void Add(Substitution value)
         {
-            var appliedRulePresent = !(value.Initial is null || value.Resulting is null);
+            var appliedRulePresent = !(value.InitialPart is null || value.ResultingPart is null);
             lines.Add(new SimplificationDescription
             {
                 SimplifiedExpression = value.Expression?.ToString() ?? string.Empty,
-                AppliedRule = appliedRulePresent ? $"{value.Initial} => {value.Resulting}" : string.Empty,
+                AppliedRule = appliedRulePresent ? $"{value.InitialPart} => {value.ResultingPart}" : string.Empty,
                 RuleDescription = value.Description
             });
         }

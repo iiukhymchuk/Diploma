@@ -25,7 +25,7 @@ namespace SetTheory
             CombineOperators(copy);
             //expr.DFSPostOrder(x => x = OrderByValue(x));
 
-            if (Expression.ExprEquals(expr, copy))
+            if (Utils.ExprEquals(expr, copy))
                 return Result<Substitution>.Empty();
 
             return new Result<Substitution>(
@@ -110,12 +110,11 @@ namespace SetTheory
                 if (!HasValue(expr, value))
                     return;
 
-                if (expr.Children.Any(child => HasRedundant(child)))
+                if (expr.Children.Any(child => MayBeCombined(child)))
                     expr.Children = expr.Children
-                        .SelectMany(x => HasValue(x, value) ? x.Children : new[] { x })
+                        .SelectMany(x => MayBeCombined(x) ? x.Children : new[] { x })
                         .ToArray();
-                bool HasRedundant(Expression expr)
-                    => HasValue(expr, value) && AnyChildHasValue(expr, value);
+                bool MayBeCombined(Expression expr) => HasValue(expr, value);
             }
         }
 

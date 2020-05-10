@@ -2,8 +2,8 @@
 {
     public class Substitution
     {
-        public Expression Initial { get; set; }
-        public Expression Resulting { get; set; }
+        public Expression InitialPart { get; set; }
+        public Expression ResultingPart { get; set; }
         public Expression Expression { get; set; }
         public string Description { get; set; }
     }

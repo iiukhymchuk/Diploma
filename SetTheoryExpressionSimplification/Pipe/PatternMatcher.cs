@@ -17,120 +17,133 @@ namespace SetTheory
             foreach (var rule in rules)
             {
                 var substitutions = new List<Substitution>();
-                expr.DFSPostOrder(x => ApplyRule(x, rule, substitutions));
+                expr.DFSPostOrder(x => ApplyRule(expr, x, rule, substitutions));
                 if (substitutions.Any())
-                {
-                    var substitution = substitutions.First();
-                    substitution.Expression = Substitute(expr, substitution.Initial, substitution.Resulting);
-                    return new Result<Substitution>(substitution);
-                }
+                    return new Result<Substitution>(substitutions.First());
             }
             return Result<Substitution>.Empty();
         }
 
-        static void ApplyRule(Expression current, Rule rule, List<Substitution> substitutions)
+        static void ApplyRule(Expression expr, Expression current, Rule rule, List<Substitution> substitutions)
         {
-            var substitutionsDictionary = new Dictionary<string, Expression>();
+            var substitutionsTable = new Dictionary<string, Expression>();
+            var partialMatches = new Dictionary<string, IEnumerable<Expression>>();
 
-            var doMatch = Match(current, rule.PatternIn, substitutionsDictionary);
+            var doMatch = CheckMatch(current.Copy(), rule.PatternIn, substitutionsTable, partialMatches);
             if (!doMatch)
                 return;
 
-            var patternOutCopy = rule.PatternOut.Copy();
-            var resulting = Substitute(patternOutCopy, substitutionsDictionary);
+            var (substitutedExpr, initial, resulting) = Substitute(expr, current, rule, substitutionsTable, partialMatches);
 
             substitutions.Add(
                 new Substitution
                 {
-                    Initial = current,
-                    Resulting = resulting,
+                    Expression = substitutedExpr,
+                    InitialPart = initial,
+                    ResultingPart = resulting,
                     Description = rule.Description
                 });
         }
 
-        static Expression Substitute(Expression expr, Expression initial, Expression resulting)
-        {
-            var tree = expr.Copy();
-            tree.DFSPostOrder(
-                x => x.Children = x.Children.Select(y => Expression.ExprEquals(y, initial) ? resulting : y).ToArray());
-            return tree;
-        }
-
-        static bool Match2(
-            Expression expr,
+        static bool CheckMatch(
+            Expression current,
             Expression pattern,
-            Dictionary<string, Expression> substitutions)
+            Dictionary<string, Expression> substitutions,
+            Dictionary<string, IEnumerable<Expression>> partialMatches)
         {
             if (IsVariable(pattern))
             {
                 var exists = substitutions.TryGetValue(pattern.Value, out var substitution);
                 if (exists)
-                    return Expression.ExprEquals(expr, substitution);
+                    return Utils.ExprEquals(current, substitution);
 
-                substitutions[pattern.Value] = expr.Copy();
+                substitutions[pattern.Value] = current.Copy();
                 return true;
             }
 
-            if (expr.Type != pattern.Type) return false;
-            if (expr.Value != pattern.Value) return false;
+            if (!IsSameExpression(current, pattern))
+                return false;
 
-            if (IsOperation(expr) && IsOperation(pattern))
+            if (pattern.Children.Length == 0)
+                return true;
+
+            var allPermutations = current.Children.GetPermutations(pattern.Children.Length).ToList();
+
+            var partialMatch = allPermutations
+                .Select(x => new { Permutation = x, NewSubs = new Dictionary<string, Expression>(substitutions) })
+                .Where(x => Utils.CollectionsEquals(
+                    x.Permutation.ToArray(),
+                    pattern.Children,
+                    (a, b) => CheckMatch(a, b, x.NewSubs, partialMatches)))
+                .FirstOrDefault();
+
+            if (partialMatch is null)
+                return false;
+            else
             {
-                //PartialMatch();
+                substitutions.Clear();
+                foreach (var item in partialMatch.NewSubs)
+                {
+                    substitutions.Add(item.Key, item.Value);
+                }
             }
 
-            if (expr.Children.Length != pattern.Children.Length) return false;
+            if (current.Children.Length != pattern.Children.Length)
+                partialMatches[pattern.Value] = partialMatch.Permutation;
 
-            foreach (var two in expr.Children.Zip(pattern.Children, (x, y) => (x, y)))
-            {
-                if (!Match(two.x, two.y, substitutions))
-                    return false;
-            }
             return true;
         }
 
-        static bool Match(
+        static (Expression, Expression, Expression) Substitute(
             Expression expr,
-            Expression pattern,
-            Dictionary<string, Expression> substitutions)
+            Expression initial,
+            Rule rule,
+            Dictionary<string, Expression> substitutionsDictionary,
+            Dictionary<string, IEnumerable<Expression>> partialMatches)
         {
-            if (IsVariable(pattern))
-            {
-                var exists = substitutions.TryGetValue(pattern.Value, out var substitution);
-                if (exists)
-                    return Expression.ExprEquals(expr, substitution);
+            var initialValue = initial.Copy();
 
-                substitutions[pattern.Value] = expr.Copy();
-                return true;
+            var substitutedPattern = GetSubstitutedVariable(rule.PatternOut);
+            var resulting = GetResultingValue(initialValue, rule.PatternIn, substitutedPattern);
+            var substitutedExpr = GetSubstitutedExpression(expr, initialValue, resulting);
+            return (substitutedExpr, initialValue, resulting);
+
+            Expression GetSubstitutedVariable(Expression patternOut)
+            {
+                var pattern = patternOut.Copy();
+                if (IsVariable(pattern))
+                    pattern = substitutionsDictionary[pattern.Value];
+                pattern.Children = pattern.Children.Select(x => GetSubstitutedVariable(x)).ToArray();
+                return pattern;
             }
 
-            if (expr.Type != pattern.Type) return false;
-            if (expr.Value != pattern.Value) return false;
-
-            if (IsOperation(expr) && IsOperation(pattern))
+            Expression GetResultingValue(Expression initialValue, Expression patternIn, Expression substitutedPattern)
             {
-                //PartialMatch();
+                var expr = initialValue.Copy();
+                if (partialMatches.TryGetValue(patternIn.Value, out var matched))
+                {
+                    expr.Children = expr.Children
+                        .Where(x => !matched.Any(match => Utils.ExprEquals(x, match)))
+                        .Concat(new[] { substitutedPattern })
+                        .ToArray();
+                    return expr;
+                }
+
+                return substitutedPattern.Copy();
             }
 
-            if (expr.Children.Length != pattern.Children.Length) return false;
-
-            foreach (var two in expr.Children.Zip(pattern.Children, (x, y) => (x, y)))
+            static Expression GetSubstitutedExpression(Expression expr, Expression initial, Expression resulting)
             {
-                if (!Match(two.x, two.y, substitutions))
-                    return false;
+                var result = expr.Copy();
+                resulting = resulting.Copy();
+                result.DFSPostOrder(
+                    x => x.Children = x.Children.Select(y => Utils.ExprEquals(y, initial) ? resulting : y).ToArray());
+                return result;
             }
-            return true;
-        }
-
-        static Expression Substitute(Expression patternOutCopy, Dictionary<string, Expression> substitutions)
-        {
-            if (IsVariable(patternOutCopy))
-                patternOutCopy = substitutions[patternOutCopy.Value];
-            patternOutCopy.Children = patternOutCopy.Children.Select(x => Substitute(x, substitutions)).ToArray();
-            return patternOutCopy;
         }
 
         static bool IsVariable(Expression pattern) => pattern.Value.StartsWith("_");
-        static bool IsOperation(Expression expr) => expr.Type == typeof(Operation);
+        static bool IsSameExpression(Expression expr1, Expression expr2)
+            => expr1.Type == expr2.Type && expr1.Value == expr2.Value;
     }
 }

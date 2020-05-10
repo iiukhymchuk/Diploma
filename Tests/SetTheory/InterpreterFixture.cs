@@ -64,6 +64,9 @@ namespace Tests.SetTheory
         [DataTestMethod]
         [DataRow("(A' + C)' + (B + B* C) * (B' + (B + C)')", "A ∩ C'")]
         [DataRow("(A ∪ (B ∩ C) ∩ C')", "A")]
+        [DataRow("(A * B) + (A * B') + (A' * B)", "A ∪ B")]
+        [DataRow("(A * B')' + B", "A' ∪ B")]
+        [DataRow("(A' * (B + C)')'", "A ∪ B ∪ C")]
         public void InterpreterReturnsExpectedResults(string input, string expected)
         {
             var tokenizer = syntax.GetTokenizer();

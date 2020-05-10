@@ -1,25 +1,28 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace SetTheory
 {
     class Normalizer
     {
-        readonly string union;
         readonly string intersection;
+        readonly string union;
 
         public Normalizer(ISettings settings)
         {
             var defaultSettings = new DefaultSettings();
-            union = settings.Union ?? defaultSettings.Union;
             intersection = settings.Intersection ?? defaultSettings.Intersection;
+            union = settings.Union ?? defaultSettings.Union;
         }
 
         internal Result<Substitution> Normalize(Expression expr)
         {
             var copy = expr.Copy();
-            RemoveRedundantParens(copy);
-            //expr.DFSPostOrder(x => x = CombineSameIntersections(x));
-            //expr.DFSPostOrder(x => x = CombineSameUnions(x));
+
+            var descriptions = new List<string>();
+
+            if (RemoveRedundantParens(copy)) descriptions.Add("Remove redundant parentheses");
+            CombineOperators(copy);
             //expr.DFSPostOrder(x => x = OrderByValue(x));
 
             if (Expression.ExprEquals(expr, copy))
@@ -29,58 +32,97 @@ namespace SetTheory
                 new Substitution
                 {
                     Expression = copy,
-                    Description = "Simplification"
-                });
+                    Description = string.Join<string>($", ", descriptions.Distinct())
+        });
         }
 
-        void RemoveRedundantParens(Expression current)
+        bool RemoveRedundantParens(Expression current)
         {
-            if (current.Type == typeof(Tree) && IsParens(current.Children[0]))
-                current.Children = current.Children[0].Children;
+            bool changed = false;
 
-            var changeChildren = false;
-            foreach (var child in current.Children)
-            {
-                RemoveRedundantParens(child);
+            changed = changed || RemoveParensForWholeExpression(current);
+            changed = changed || RemoveParensForNotOperators(current);
+            changed = changed || RemoveParensForOperators(current);
 
-                if (ParensMayBeOmited(child))
-                    changeChildren = true;
-            }
-
-            if (changeChildren)
-                current.Children = current.Children.Select(x => ParensMayBeOmited(x) ? x.Children[0] : x).ToArray();
-
-            bool ParensMayBeOmited(Expression expr) => IsParens(expr) && !ChildIsOperator(expr);
+            return changed;
         }
 
-        //Expression CombineSameIntersections(Expression current)
-        //{
-        //    if (HasValue(current, intersection) && ChildrenHasValue(current, intersection))
-        //        current.Children = current.Children
-        //            .SelectMany(x => HasValue(x, intersection) ? x.Children : new[] { x })
-        //            .ToArray();
-        //    return current;
-        //}
+        bool RemoveParensForWholeExpression(Expression expr)
+        {
+            if (!HasRedundant(expr))
+                return false;
 
-        //Expression CombineSameUnions(Expression current)
-        //{
-        //    if (HasValue(current, union) && ChildrenHasValue(current, union))
-        //        current.Children = current.Children
-        //            .SelectMany(x => HasValue(x, union) ? x.Children : new[] { x })
-        //            .ToArray();
-        //    return current;
-        //}
+            expr.Children = expr.Children[0].Children;
+            return true;
 
-        //Expression OrderByValue(Expression current)
-        //{
-        //    current.Children = current.Children.OrderBy(x => x.Value).ToArray();
-        //    return current;
-        //}
+            bool HasRedundant(Expression expr) => expr.Type == typeof(Tree) && IsParensType(expr.Children[0]);
+        }
 
-        bool IsParens(Expression expr) => expr.Type == typeof(Parens);
-        bool IsOperator(Expression expr) => expr.Type == typeof(BinaryOperation);
-        bool ChildIsOperator(Expression expr) => expr.Children.Length == 1 && IsOperator(expr.Children[0]);
+        bool RemoveParensForNotOperators(Expression expr)
+        {
+            var changed = false;
+            expr.DFSPostOrder(x => Remove(x, ref changed));
+            return changed;
+
+            void Remove(Expression expr, ref bool chaged)
+            {
+                if (expr.Children.Any(child => HasRedundant(child)))
+                {
+                    expr.Children = expr.Children
+                        .Select(x => HasRedundant(x) ? x.Children[0] : x)
+                        .ToArray();
+                    changed = true;
+                }
+                bool HasRedundant(Expression expr) => IsParensType(expr) && !OnlyChildIsOperator(expr);
+            }
+        }
+
+        bool RemoveParensForOperators(Expression expr)
+        {
+            var changed = false;
+            expr.DFSPostOrder(x => Remove(x, intersection, ref changed));
+            expr.DFSPostOrder(x => Remove(x, union, ref changed));
+            return changed;
+
+            void Remove(Expression expr, string value, ref bool chaged)
+            {
+                if (!HasValue(expr, value))
+                    return;
+
+                if (expr.Children.Any(child => HasRedundant(child)))
+                {
+                    expr.Children = expr.Children
+                        .Select(x => HasRedundant(x) ? x.Children[0] : x)
+                        .ToArray();
+                    changed = true;
+                }
+                bool HasRedundant(Expression expr) => IsParensType(expr) && AnyChildHasValue(expr, value);
+            }
+        }
+
+        void CombineOperators(Expression expr)
+        {
+            expr.DFSPostOrder(x => Combine(x, intersection));
+            expr.DFSPostOrder(x => Combine(x, union));
+
+            void Combine(Expression expr, string value)
+            {
+                if (!HasValue(expr, value))
+                    return;
+
+                if (expr.Children.Any(child => HasRedundant(child)))
+                    expr.Children = expr.Children
+                        .SelectMany(x => HasValue(x, value) ? x.Children : new[] { x })
+                        .ToArray();
+                bool HasRedundant(Expression expr)
+                    => HasValue(expr, value) && AnyChildHasValue(expr, value);
+            }
+        }
+
+        bool IsParensType(Expression expr) => expr.Type == typeof(Parens);
+        bool IsOperatorType(Expression expr) => expr.Type == typeof(Operation);
+        bool OnlyChildIsOperator(Expression expr) => expr.Children.Length == 1 && IsOperatorType(expr.Children[0]);
         bool HasValue(Expression expr, string value) => expr.Value == value;
-        bool ChildrenHasValue(Expression expr, string value) => expr.Children.Any(x => x.Value == value);
+        bool AnyChildHasValue(Expression expr, string value) => expr.Children.Any(x => x.Value == value);
     }
 }

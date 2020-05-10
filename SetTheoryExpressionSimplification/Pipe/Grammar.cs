@@ -85,7 +85,7 @@ namespace SetTheory
         }
 
         Func<string, Expression, Expression, Expression> CreateBinaryOperation()
-            => (value, child1, child2) => new BinaryOperation(value, child1, child2);
+            => (value, child1, child2) => new Operation(value, child1, child2);
 
         public ExpressionParser BuildTree => Union.AtEnd().Select(x => (Expression) new Tree("Tree", x));
     }

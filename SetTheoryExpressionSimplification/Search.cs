@@ -5,21 +5,21 @@ namespace SetTheory
 {
     public static class Search
     {
-        public static void DFSPostOrder(
+        public static void DFSPostOrder(this Expression current, Action<Expression> action)
+            => current.DFSPostOrderInternal(action, new HashSet<Expression>());
+
+        static void DFSPostOrderInternal(
             this Expression current,
             Action<Expression> action,
-            HashSet<Expression> visited = null)
+            HashSet<Expression> visited)
         {
-            visited ??= new HashSet<Expression>();
             if (visited.Contains(current))
                 return;
 
             visited.Add(current);
 
             foreach (var child in current.Children)
-            {
-                child.DFSPostOrder(action, visited);
-            }
+                child.DFSPostOrderInternal(action, visited);
 
             action?.Invoke(current);
         }

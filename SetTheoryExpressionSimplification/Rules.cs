@@ -1,16 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace SetTheory
 {
     public class Rules
     {
-        readonly static List<Rule> normalizationRules =
-            new List<Rule>
-            {
-                new Rule("(_A) = _A", "Remove redundant parantheses"),
-            };
-
         readonly static List<Rule> rules =
             new List<Rule>
             {
@@ -46,11 +39,6 @@ namespace SetTheory
         public List<Rule> GetRules()
         {
             return rules;
-        }
-
-        public List<Rule> GetNormalizationRules()
-        {
-            return normalizationRules;
         }
     }
 }

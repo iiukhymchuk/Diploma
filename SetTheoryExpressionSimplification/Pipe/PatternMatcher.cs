@@ -18,7 +18,10 @@ namespace SetTheory
             {
                 var result = expr.DFSPostOrder(x => ApplyRule(x, rule));
                 if (result.HasValue)
+                {
+                    result.Value.Expression = ChangeTree(expr, result.Value.Initial, result.Value.Resulting);
                     return result;
+                }
             }
             return Result<Substitution>.Empty();
         }
@@ -33,6 +36,7 @@ namespace SetTheory
 
             var patternOutCopy = rule.PatternOut.Copy();
             var resulting = Substitute(patternOutCopy, substitutions);
+
             return new Result<Substitution>(
                 new Substitution
                 {
@@ -40,6 +44,14 @@ namespace SetTheory
                     Resulting = resulting,
                     Description = rule.Description
                 });
+        }
+
+        static Expression ChangeTree(Expression expr, Expression initial, Expression resulting)
+        {
+            var tree = expr.Copy();
+            tree.DFSPostOrder(
+                x => x.Children = x.Children.Select(y => Expression.ExprEquals(y, initial) ? resulting : y).ToArray());
+            return tree;
         }
 
         static bool Match(

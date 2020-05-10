@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace SetTheory
 {
@@ -7,45 +6,44 @@ namespace SetTheory
     {
         private readonly PatternMatcher patternMatcher;
         private readonly Normalizer normalizer;
+        private readonly Printer printer;
 
         public Interpreter(PatternMatcher patternMatcher, Normalizer normalizer)
         {
             this.patternMatcher = patternMatcher;
             this.normalizer = normalizer;
+            this.printer = new Printer();
         }
 
-        public List<SimplificationDescription> Interpretate(Tree expr)
+        public List<SimplificationDescription> Interpretate(Expression expr)
         {
-            var lines = new List<SimplificationDescription>();
-
+            printer.Add(
+                new Substitution
+                {
+                    Expression = expr,
+                    Description = "Initial value"
+                });
             while (true)
             {
-                // normalize expression
-                expr = normalizer.Normalize(expr);
+                var normalizationResult = normalizer.Normalize(expr);
 
-                // match expression
-                var result = patternMatcher.Match(expr);
-
-                if (!result.HasValue)
-                    return lines;
-
-                // print
-                expr = ApplyPattern(expr, result.Value.Initial, result.Value.Resulting);
-                lines.Add(new SimplificationDescription
+                if (normalizationResult.HasValue)
                 {
-                    SimplifiedExpression = expr.ToString(),
-                    AppliedRule = $"{result.Value.Initial} => {result.Value.Resulting}",
-                    RuleDescription = result.Value.Description
-                });
-            }
-        }
+                    expr = normalizationResult.Value.Expression;
+                    printer.Add(normalizationResult.Value);
+                }
 
-        static Tree ApplyPattern(Tree expr, Expression initial, Expression resulting)
-        {
-            var tree = (Tree) expr.Copy();
-            tree.DFSPostOrder(
-                x => x.Children = x.Children.Select(y => Expression.ExprEquals(y, initial) ? resulting : y).ToArray());
-            return tree;
+                var evaluationResult = patternMatcher.Match(expr);
+
+                if (evaluationResult.HasValue)
+                {
+                    expr = evaluationResult.Value.Expression;
+                    printer.Add(evaluationResult.Value);
+                }
+
+                if (!normalizationResult.HasValue && !evaluationResult.HasValue)
+                    return printer.GetLines();
+            }
         }
     }
 }

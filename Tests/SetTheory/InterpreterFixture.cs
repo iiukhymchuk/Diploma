@@ -18,11 +18,12 @@ namespace Tests.SetTheory
             var rules = new Rules();
             syntax = new Syntax(settings);
             grammar = new Grammar(settings);
-            interpeter = new Interpreter(new PatternMatcher(rules.GetRules()), new Normalizer(rules.GetNormalizationRules()));
+            interpeter = new Interpreter(new PatternMatcher(rules.GetRules()), new Normalizer(settings));
         }
 
         [DataTestMethod]
         [DataRow("(A' + C)' + (B + B* C) * (B' + (B + C)')", "A ∩ C'")]
+        [DataRow("(A ∪ (B ∩ C) ∩ C')", "A ∪ B")]
         public void InterpreterReturnsExpectedResults(string input, string expected)
         {
             var tokenizer = syntax.GetTokenizer();

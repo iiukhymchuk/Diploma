@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Linq;
 
 namespace SetTheory
@@ -17,7 +18,7 @@ namespace SetTheory
 
         public override Expression Copy(bool copyId = false)
             => copyId
-                ? new Operation(Value, Children.Select(x => x.Copy(copyId)).ToArray()) { Id = Id }
+                ? new Operation(Value, Children.Select(x => x.Copy(copyId)).ToArray()) { Id = Id ?? Guid.NewGuid() }
                 : new Operation(Value, Children.Select(x => x.Copy(copyId)).ToArray());
 
         public override string ToString() => $"{string.Join<Expression>($" {Value} ", Children)}";

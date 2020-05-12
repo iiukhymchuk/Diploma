@@ -18,8 +18,8 @@ namespace SetTheory
                 new Rule("O' = U", "Complement rule"),
                 new Rule("U' = O", "Complement rule"),
                 new Rule("_A'' = _A", "Involution rule"),
-                new Rule("(_A + _B) * (_A + _C) = _A + (_B * _C)", "Distributive rule"),
-                new Rule("(_A * _B) + (_A * _C) = _A * (_B + _C)", "Distributive rule"),
+                new Rule("(_A + _B) * (_A + _C) = (_A + (_B * _C))", "Distributive rule"),
+                new Rule("(_A * _B) + (_A * _C) = (_A * (_B + _C))", "Distributive rule"),
                 new Rule("_A + (_A * _B) = _A", "Absorption rule"),
                 new Rule("_A + _A * _B = _A", "Absorption rule"),
                 new Rule("_A * (_A + _B) = _A", "Absorption rule"),
@@ -27,6 +27,9 @@ namespace SetTheory
                 new Rule("(_A * _B)' = (_A' + _B')", "De Morgan's rule"),
                 new Rule("_A + (_B * _C) = (_A + _B) * (_A + _C)", "Distributive rule"),
                 new Rule("_A * (_B + _C) = (_A * _B) + (_A * _C)", "Distributive rule"),
+                // take the simplest result in list of results
+                new Rule("_A' * _B' = (_A + _B)'", "De Morgan's rule"),
+                new Rule("_A' + _B' = (_A * _B)'", "De Morgan's rule"),
             };
 
         public List<Rule> GetRules()

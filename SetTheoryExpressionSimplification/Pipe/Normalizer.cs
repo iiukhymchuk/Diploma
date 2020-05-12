@@ -29,7 +29,6 @@ namespace SetTheory
             }
             if (CombineOperators(copy))
                 changed = true;
-            //expr.DFSPostOrder(x => x = OrderByValue(x));
 
             if (changed)
                 return new Result<Substitution>(

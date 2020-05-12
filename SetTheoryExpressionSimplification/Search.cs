@@ -15,6 +15,14 @@ namespace SetTheory
             yield return expr;
         }
 
+        public static IEnumerable<Expression> IterateBFSPostOrder(this Expression expr)
+        {
+            yield return expr;
+            foreach (var child in expr.Children)
+                foreach (var subChild in IterateBFSPostOrder(child))
+                    yield return subChild;
+        }
+
         static void DFSPostOrderInternal(
             Expression current,
             Action<Expression> action,

@@ -7,7 +7,7 @@ namespace SetTheory
     class PatternMatcher
     {
         readonly List<Rule> rules;
-        const int MaxResultsPerTurn = 10;
+        const int MaxResultsPerTurn = 128;
 
         public PatternMatcher(List<Rule> rules)
         {
@@ -18,7 +18,7 @@ namespace SetTheory
         {
             var substitutions = new List<Substitution>();
 
-            foreach (var tree in GetOperationPermutations(expr.Copy()))
+            foreach (var tree in GetOperationPermutations(expr.Copy(true)))
                 foreach (var node in tree.IterateDFSPostOrder())
                     foreach (var rule in rules)
                     {
@@ -27,22 +27,45 @@ namespace SetTheory
                         if (sub != null && !IsAlreadyPresent(sub.ResultingExpression.ToString()))
                             substitutions.Add(sub);
 
-                        if (substitutions.Count() >= MaxResultsPerTurn)
-                            goto resultSelection;
+                        if (substitutions.Any() && (substitutions.Count() % MaxResultsPerTurn == 0))
+                        {
+                            var simplest = substitutions
+                                .OrderBy(x => SimplicityCount(x.ResultingPart) / SimplicityCount(x.InitialPart))
+                                .First();
+                            if (SimplicityCount(simplest.ResultingPart) / SimplicityCount(simplest.InitialPart) < 0.99d)
+                                return new Result<Substitution>(simplest);
+                            else
+                            {
+                                substitutions.Clear();
+                                substitutions.Add(simplest);
+
+                            }
+                        }
                     }
 
-        resultSelection:
-
             if (substitutions.Any())
-                return new Result<Substitution>(substitutions
-                    .OrderBy(x => SimplicityCount(x.ResultingExpression))
-                    .First());
+            {
+                var result = substitutions
+                    .OrderBy(x => SimplicityCount(x.ResultingPart) / SimplicityCount(x.InitialPart))
+                    .First();
+
+                return new Result<Substitution>(result);
+            }
 
             return Result<Substitution>.Empty();
+
+
 
             bool IsAlreadyPresent(string expressionString) =>
                 used.Contains(expressionString)
                     || substitutions.Any(s => s.ResultingExpression.ToString() == expressionString);
+        }
+
+        static double SimplicityCount(Expression x)
+        {
+            var skip = x.Type == typeof(Parens) ? 1 : 0;
+
+            return x.IterateBFSPostOrder().Skip(skip).Sum(e => 1d);
         }
 
         static IEnumerable<Expression> GetOperationPermutations(Expression expr, Guid? guid = null)
@@ -93,12 +116,10 @@ namespace SetTheory
         {
             var matchSubstitutions = new Dictionary<string, Expression>();
 
-            var exprCopy = expression.Copy();
-
-            if (!CheckMatch(exprCopy, rule.PatternIn, matchSubstitutions))
+            if (!CheckMatch(expression, rule.PatternIn, matchSubstitutions))
                 return null;
 
-            return Substitute(tree, exprCopy, rule, matchSubstitutions);
+            return Substitute(tree, expression, rule, matchSubstitutions);
         }
 
         static bool CheckMatch(
@@ -176,6 +197,5 @@ namespace SetTheory
         static bool HasChildren(Expression pattern) => pattern.Children.Length != 0;
         static bool IsSameExpression(Expression expr1, Expression expr2)
             => expr1.Type == expr2.Type && expr1.Value == expr2.Value;
-        static int SimplicityCount(Expression x) => x.IterateDFSPostOrder().Sum(e => 1);
     }
 }

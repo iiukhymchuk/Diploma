@@ -1,5 +1,8 @@
-﻿namespace SetTheory
+﻿using System.Diagnostics;
+
+namespace SetTheory
 {
+    [DebuggerDisplay("{Debug}")]
     public class Parens : Expression
     {
         public Parens(Expression child)
@@ -14,5 +17,6 @@
             => new Parens(Children[0].Copy(copyId));
 
         public override string ToString() => $"({Children[0]})";
+        public override string Debug => $"({Children[0].Debug})";
     }
 }

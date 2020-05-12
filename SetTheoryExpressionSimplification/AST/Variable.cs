@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace SetTheory
 {
+    [DebuggerDisplay("{Debug}")]
     public class Variable : Expression
     {
         public Variable(string value)
@@ -17,5 +19,6 @@ namespace SetTheory
             => new Variable(Value);
 
         public override string ToString() => Value;
+        public override string Debug => Value;
     }
 }

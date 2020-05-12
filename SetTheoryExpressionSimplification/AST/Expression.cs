@@ -10,5 +10,6 @@ namespace SetTheory
         public abstract Expression[] Children { get; set; }
         public abstract Expression Copy(bool copyId = false);
         public abstract override string ToString();
+        public abstract string Debug { get; }
     }
 }

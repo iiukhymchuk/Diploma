@@ -1,5 +1,8 @@
-﻿namespace SetTheory
+﻿using System.Diagnostics;
+
+namespace SetTheory
 {
+    [DebuggerDisplay("{Debug}")]
     public class NegationOperation : Expression
     {
         readonly bool isPrefixNegation;
@@ -18,5 +21,6 @@
             => new NegationOperation(Value, Children[0].Copy(copyId), isPrefixNegation);
 
         public override string ToString() => $"{(isPrefixNegation ? Value + Children[0] : Children[0] + Value)}";
+        public override string Debug => $"{(isPrefixNegation ? Value + Children[0].Debug : Children[0].Debug + Value)}";
     }
 }

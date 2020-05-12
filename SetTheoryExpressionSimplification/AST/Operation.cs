@@ -23,6 +23,6 @@ namespace SetTheory
 
         public override string ToString() => $"{string.Join<Expression>($" {Value} ", Children)}";
 
-        public string Debug => $"({string.Join<Expression>($" {Value} ", Children)})";
+        public override string Debug => $"({string.Join<string>($" {Value} ", Children.Select(x => x.Debug))})";
     }
 }

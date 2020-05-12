@@ -7,7 +7,8 @@ namespace SetTheory
     class PatternMatcher
     {
         readonly List<Rule> rules;
-        const int MaxResultsPerTurn = 128;
+        const int MaxSubstitutionsPerRun = 32;
+        const double SubstitutionSimplicityConstant = 0.99d;
 
         public PatternMatcher(List<Rule> rules)
         {
@@ -16,6 +17,7 @@ namespace SetTheory
 
         internal Result<Substitution> Match(Expression expr, HashSet<string> used)
         {
+            var substitutionsLoolup = new HashSet<string>();
             var substitutions = new List<Substitution>();
 
             foreach (var tree in GetOperationPermutations(expr.Copy(true)))
@@ -24,57 +26,50 @@ namespace SetTheory
                     {
                         var sub = MatchPattern(tree.Copy(), node, rule);
 
-                        if (sub != null && !IsAlreadyPresent(sub.ResultingExpression.ToString()))
-                            substitutions.Add(sub);
+                        if (sub is null)
+                            continue;
 
-                        if (substitutions.Any() && (substitutions.Count() % MaxResultsPerTurn == 0))
+                        var stringRepresentation = sub.ResultingExpression.Debug;
+                        if (!used.Contains(stringRepresentation) && !substitutionsLoolup.Contains(stringRepresentation))
                         {
-                            var simplest = substitutions
-                                .OrderBy(x => SimplicityCount(x.ResultingPart) / SimplicityCount(x.InitialPart))
-                                .First();
-                            if (SimplicityCount(simplest.ResultingPart) / SimplicityCount(simplest.InitialPart) < 0.99d)
-                                return new Result<Substitution>(simplest);
-                            else
-                            {
-                                substitutions.Clear();
-                                substitutions.Add(simplest);
+                            substitutionsLoolup.Add(stringRepresentation);
+                            substitutions.Add(sub);
+                        }
 
-                            }
+                        if (substitutions.Any() && (substitutions.Count() >= MaxSubstitutionsPerRun))
+                        {
+                            var simplest = substitutions.OrderBy(CountSubstitutionSimplicity).First();
+
+                            if (CountSubstitutionSimplicity(simplest) < SubstitutionSimplicityConstant)
+                                return new Result<Substitution>(simplest);
+
+                            substitutions.Clear();
+                            substitutions.Add(simplest);
                         }
                     }
 
             if (substitutions.Any())
-            {
-                var result = substitutions
-                    .OrderBy(x => SimplicityCount(x.ResultingPart) / SimplicityCount(x.InitialPart))
-                    .First();
-
-                return new Result<Substitution>(result);
-            }
+                return new Result<Substitution>(substitutions.OrderBy(CountSubstitutionSimplicity).First());
 
             return Result<Substitution>.Empty();
-
-
-
-            bool IsAlreadyPresent(string expressionString) =>
-                used.Contains(expressionString)
-                    || substitutions.Any(s => s.ResultingExpression.ToString() == expressionString);
         }
 
-        static double SimplicityCount(Expression x)
+        double CountSubstitutionSimplicity(Substitution substitution)
         {
-            var skip = x.Type == typeof(Parens) ? 1 : 0;
+            return SimplicityCount(substitution.ResultingPart) / SimplicityCount(substitution.InitialPart);
 
-            return x.IterateBFSPostOrder().Skip(skip).Sum(e => 1d);
+            static double SimplicityCount(Expression x)
+            {
+                var skip = x.Type == typeof(Parens) ? 1 : 0;
+                return x.IterateBFSPostOrder().Skip(skip).Sum(e => 1d);
+            }
         }
 
         static IEnumerable<Expression> GetOperationPermutations(Expression expr, Guid? guid = null)
         {
-            bool alreadyReturned = false;
             var guidIsMet = false;
 
-            var nodes = expr.IterateDFSPostOrder().SkipWhile(x => !ShouldTake(x)).ToList();
-            foreach (var child in nodes)
+            foreach (var child in expr.IterateDFSPostOrder().SkipWhile(x => !ShouldTake(x)))
             {
                 if (child.Type == typeof(Operation))
                 {
@@ -87,17 +82,17 @@ namespace SetTheory
                         var sub = copy.IterateDFSPostOrder().First(x => x.Id == child.Id);
                         sub.Children = p.ToArray();
 
-                        alreadyReturned = true;
                         foreach (var tree in GetOperationPermutations(copy, sub.Id))
                         {
                             yield return tree;
                         }
                     }
+
+                    yield break;
                 }
             }
 
-            if (!alreadyReturned)
-                yield return expr;
+            yield return expr;
 
             bool ShouldTake(Expression x)
             {
@@ -125,10 +120,8 @@ namespace SetTheory
         static bool CheckMatch(
             Expression toBeMatched,
             Expression pattern,
-            Dictionary<string, Expression> matchSubstitutions = null)
+            Dictionary<string, Expression> matchSubstitutions)
         {
-            matchSubstitutions ??= new Dictionary<string, Expression>();
-
             if (IsVariable(pattern))
             {
                 var exists = matchSubstitutions.TryGetValue(pattern.Value, out var substitution);
@@ -183,9 +176,9 @@ namespace SetTheory
                 return pattern;
             }
 
-            static Expression GetSubstitutedExpression(Expression expr, Expression initial, Expression resulting)
+            static Expression GetSubstitutedExpression(Expression tree, Expression initial, Expression resulting)
             {
-                var result = expr.Copy();
+                var result = tree.Copy();
                 resulting = resulting.Copy();
                 result.DFSPostOrder(
                     x => x.Children = x.Children.Select(y => Utils.ExprEquals(y, initial) ? resulting : y).ToArray());

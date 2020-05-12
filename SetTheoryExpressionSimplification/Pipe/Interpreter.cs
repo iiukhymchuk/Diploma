@@ -32,7 +32,7 @@ namespace SetTheory
                 if (normalizationResult.HasValue)
                 {
                     expr = normalizationResult.Value.ResultingExpression;
-                    used.Add(expr.ToString());
+                    used.Add(expr.Debug);
                     printer.Add(normalizationResult.Value);
                 }
 
@@ -41,7 +41,7 @@ namespace SetTheory
                 if (evaluationResult.HasValue)
                 {
                     expr = evaluationResult.Value.ResultingExpression;
-                    used.Add(expr.ToString());
+                    used.Add(expr.Debug);
                     printer.Add(evaluationResult.Value);
                 }
 

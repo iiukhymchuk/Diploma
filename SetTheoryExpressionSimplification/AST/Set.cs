@@ -13,7 +13,11 @@ namespace SetTheory
         public override string Value { get; }
         public override Expression[] Children { get; set; }
 
-        public override Expression Copy() => new Set(Value);
+        public override Expression Copy(bool copyId = false)
+            => copyId
+                ? new Set(Value) { Id = Id }
+                : new Set(Value);
+
         public override string ToString() => Value;
     }
 }

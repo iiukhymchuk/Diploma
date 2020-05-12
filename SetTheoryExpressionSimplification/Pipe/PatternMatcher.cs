@@ -7,9 +7,7 @@ namespace SetTheory
     class PatternMatcher
     {
         readonly List<Rule> rules;
-        readonly Dictionary<string, List<Expression>> cache = new Dictionary<string, List<Expression>>();
         const int MaxResultsPerTurn = 10;
-
 
         public PatternMatcher(List<Rule> rules)
         {
@@ -20,12 +18,9 @@ namespace SetTheory
         {
             var substitutions = new List<Substitution>();
 
-            foreach (var rule in rules)
-            {
-                var perms = GerPermutationsFromCache(expr.Copy());
-                foreach (var tree in perms)
-                {
-                    foreach (var node in tree.IterateDFSPostOrder())
+            foreach (var tree in GetOperationPermutations(expr.Copy()))
+                foreach (var node in tree.IterateDFSPostOrder())
+                    foreach (var rule in rules)
                     {
                         var sub = MatchPattern(tree.Copy(), node, rule);
 
@@ -35,10 +30,8 @@ namespace SetTheory
                         if (substitutions.Count() >= MaxResultsPerTurn)
                             goto resultSelection;
                     }
-                }
-            }
 
-            resultSelection:
+        resultSelection:
 
             if (substitutions.Any())
                 return new Result<Substitution>(substitutions
@@ -50,29 +43,15 @@ namespace SetTheory
             bool IsAlreadyPresent(string expressionString) =>
                 used.Contains(expressionString)
                     || substitutions.Any(s => s.ResultingExpression.ToString() == expressionString);
-
-            static int SimplicityCount(Expression x) => x.IterateDFSPostOrder().Sum(e => 1);
-        }
-
-        List<Expression> GerPermutationsFromCache(Expression expr)
-        {
-            var key = expr.ToString();
-            if (cache.TryGetValue(key, out var permutations))
-                return permutations;
-            else
-            {
-                var perms = GetOperationPermutations(expr).ToList();
-                cache[key] = perms;
-                return perms;
-            }
         }
 
         static IEnumerable<Expression> GetOperationPermutations(Expression expr, Guid? guid = null)
         {
             bool alreadyReturned = false;
             var guidIsMet = false;
-            var allNodes = expr.IterateDFSPostOrder().SkipWhile(x => !ShouldTake(x)).ToList();
-            foreach (var child in allNodes)
+
+            var nodes = expr.IterateDFSPostOrder().SkipWhile(x => !ShouldTake(x)).ToList();
+            foreach (var child in nodes)
             {
                 if (child.Type == typeof(Operation))
                 {
@@ -81,9 +60,8 @@ namespace SetTheory
                         .Select(x => x.SplitInTwo(child))
                         .SelectMany(x => x))
                     {
-                        var copy = expr.Copy();
-                        var sub = copy.IterateDFSPostOrder().First(x => x.ToString() == child.ToString());
-                        sub.Id = Guid.NewGuid();
+                        var copy = expr.Copy(true);
+                        var sub = copy.IterateDFSPostOrder().First(x => x.Id == child.Id);
                         sub.Children = p.ToArray();
 
                         alreadyReturned = true;
@@ -198,5 +176,6 @@ namespace SetTheory
         static bool HasChildren(Expression pattern) => pattern.Children.Length != 0;
         static bool IsSameExpression(Expression expr1, Expression expr2)
             => expr1.Type == expr2.Type && expr1.Value == expr2.Value;
+        static int SimplicityCount(Expression x) => x.IterateDFSPostOrder().Sum(e => 1);
     }
 }

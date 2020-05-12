@@ -1,7 +1,9 @@
-﻿using System.Linq;
+﻿using System.Diagnostics;
+using System.Linq;
 
 namespace SetTheory
 {
+    [DebuggerDisplay("{Debug}")]
     public class Operation : Expression
     {
         public Operation(string value, params Expression[] children)
@@ -14,6 +16,8 @@ namespace SetTheory
         public override Expression[] Children { get; set; }
 
         public override Expression Copy() => new Operation(Value, Children.Select(x => x.Copy()).ToArray());
-        public override string ToString() => string.Join<Expression>($" {Value} ", Children);
+        public override string ToString() => $"{string.Join<Expression>($" {Value} ", Children)}";
+
+        public string Debug => $"({string.Join<Expression>($" {Value} ", Children)})";
     }
 }

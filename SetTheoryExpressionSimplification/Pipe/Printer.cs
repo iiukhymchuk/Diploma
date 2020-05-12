@@ -11,7 +11,7 @@ namespace SetTheory
             var appliedRulePresent = !(value.InitialPart is null || value.ResultingPart is null);
             lines.Add(new SimplificationDescription
             {
-                SimplifiedExpression = value.Expression?.ToString() ?? string.Empty,
+                SimplifiedExpression = value.ResultingExpression?.ToString() ?? string.Empty,
                 AppliedRule = appliedRulePresent ? $"{value.InitialPart} => {value.ResultingPart}" : string.Empty,
                 RuleDescription = value.Description
             });

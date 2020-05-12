@@ -45,7 +45,7 @@ namespace SetTheory
                 from lparen in Token.EqualTo(TokenType.LParen)
                 from expr in Parse.Ref(() => Union)
                 from rparen in Token.EqualTo(TokenType.RParen)
-                select (Expression)new Parens("()", expr);
+                select (Expression)new Parens(expr);
             Factor = Set.Try()
                .Or(UniverseSet).Try()
                .Or(EmptySet).Try()

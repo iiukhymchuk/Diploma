@@ -19,21 +19,27 @@ namespace SetTheory
         {
             var copy = expr.Copy();
 
+            var changed = false;
             var descriptions = new List<string>();
 
-            if (RemoveRedundantParens(copy)) descriptions.Add("Remove redundant parentheses");
-            CombineOperators(copy);
+            if (RemoveRedundantParens(copy))
+            {
+                changed = true;
+                descriptions.Add("Remove redundant parentheses");
+            }
+            if (CombineOperators(copy))
+                changed = true;
             //expr.DFSPostOrder(x => x = OrderByValue(x));
 
-            if (Utils.ExprEquals(expr, copy))
-                return Result<Substitution>.Empty();
-
-            return new Result<Substitution>(
+            if (changed)
+                return new Result<Substitution>(
                 new Substitution
                 {
-                    Expression = copy,
+                    ResultingExpression = copy,
                     Description = string.Join<string>($", ", descriptions.Distinct())
-        });
+                });
+
+            return Result<Substitution>.Empty();
         }
 
         bool RemoveRedundantParens(Expression current)
@@ -100,21 +106,27 @@ namespace SetTheory
             }
         }
 
-        void CombineOperators(Expression expr)
+        bool CombineOperators(Expression expr)
         {
+            var combined = false;
+
             expr.DFSPostOrder(x => Combine(x, intersection));
             expr.DFSPostOrder(x => Combine(x, union));
+
+            return combined;
 
             void Combine(Expression expr, string value)
             {
                 if (!HasValue(expr, value))
                     return;
 
-                if (expr.Children.Any(child => MayBeCombined(child)))
+                if (expr.Children.Any(child => HasValue(child, value)))
+                {
+                    combined = true;
                     expr.Children = expr.Children
-                        .SelectMany(x => MayBeCombined(x) ? x.Children : new[] { x })
+                        .SelectMany(x => HasValue(x, value) ? x.Children : new[] { x })
                         .ToArray();
-                bool MayBeCombined(Expression expr) => HasValue(expr, value);
+                }
             }
         }
 

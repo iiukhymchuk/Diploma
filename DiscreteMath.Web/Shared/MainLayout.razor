@@ -1,0 +1,27 @@
+﻿@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
+
+@using DiscreteMath.Web.Pages
+
+<div class="sidebar">
+    <NavMenu />
+</div>
+
+<div class="main">
+    <div class="top-row px-4">
+        @if (isWeb)
+        {
+            <button class="btn btn-primary ml-md-auto" @onclick="() => NavigationManager.NavigateTo(nameof(Download).ToLower())">
+                Download
+            </button>
+        }
+    </div>
+
+    <div class="content px-4">
+        @Body
+    </div>
+</div>
+
+@code {
+    bool isWeb = true;
+}

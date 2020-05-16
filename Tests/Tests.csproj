@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SetTheoryExpressionSimplification\SetTheory.csproj" />
+    <ProjectReference Include="..\DiscreteMath.Core\DiscreteMath.Core.csproj" />
   </ItemGroup>
 
 </Project>

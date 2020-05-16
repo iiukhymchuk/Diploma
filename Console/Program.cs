@@ -57,9 +57,9 @@ namespace ConsoleApp
         {
             foreach (var l in lines)
             {
-                var message = $"{string.Empty, -2} // {l.AppliedRule} - {l.RuleDescription}";
+                Console.Write($"{string.Empty,-3}{l.SimplifiedExpression}", ConsoleColor.DarkGray);
+                var message = $"({l.RuleDescription}) {l.AppliedRule}";
                 WriteInColor(message, ConsoleColor.Cyan);
-                Console.WriteLine($"-->{string.Empty,-3}{l.SimplifiedExpression}", ConsoleColor.DarkGray);
             }
         }
 

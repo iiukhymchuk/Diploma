@@ -1,3 +1,5 @@
+using ElectronNET.API;
+using ElectronNET.API.Entities;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
@@ -7,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Linq;
 using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace DiscreteMath.Web.ServerModel
 {
@@ -66,6 +69,16 @@ namespace DiscreteMath.Web.ServerModel
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });
+
+            // Open the Electron-Window here
+            Task.Run(async () => await Electron.WindowManager.CreateWindowAsync(
+                new BrowserWindowOptions
+                {
+                    AutoHideMenuBar = true,
+                    Width = 1024,
+                    Height = 768,
+                    Center = true
+                }));
         }
     }
 }

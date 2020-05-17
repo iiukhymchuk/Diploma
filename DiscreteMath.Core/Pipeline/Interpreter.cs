@@ -33,9 +33,12 @@ namespace DiscreteMath.Core.Pipeline
 
                 if (normalizationResult.HasValue)
                 {
-                    expr = normalizationResult.Value.ResultingExpression;
+                    var value = normalizationResult.Value;
+                    expr = value.ResultingExpression;
                     used.Add(expr.Debug);
-                    printer.Add(normalizationResult.Value);
+
+                    if (!string.IsNullOrEmpty(value.Description))
+                        printer.Add(value);
                 }
 
                 var evaluationResult = patternMatcher.Match(expr, used);

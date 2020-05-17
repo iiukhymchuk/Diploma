@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SetTheory
+namespace DiscreteMath.Core.Language
 {
     public abstract class Expression
     {

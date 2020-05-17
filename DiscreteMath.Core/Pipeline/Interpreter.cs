@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using DiscreteMath.Core.Language;
+using DiscreteMath.Core.Structs;
+using System.Collections.Generic;
 
-namespace SetTheory
+namespace DiscreteMath.Core.Pipeline
 {
     class Interpreter
     {
@@ -12,7 +14,7 @@ namespace SetTheory
         {
             this.patternMatcher = patternMatcher;
             this.normalizer = normalizer;
-            this.printer = new Printer();
+            printer = new Printer();
         }
 
         public List<SimplificationDescription> Interpretate(Expression expr)

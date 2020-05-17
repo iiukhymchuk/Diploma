@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SetTheory;
 using System.Linq;
+using DiscreteMath.Core.Language;
+using DiscreteMath.Core.Pipeline;
 
 namespace Tests.SetTheory
 {
@@ -22,6 +23,12 @@ namespace Tests.SetTheory
         }
 
         [DataTestMethod]
+        [DataRow("A △ O", "A")]
+        [DataRow("A △ A", "∅")]
+        [DataRow("A △ B", "(A ∩ B') ∪ (A' ∩ B)")]
+        [DataRow("A - O", "A")]
+        [DataRow("A - A", "∅")]
+        [DataRow("A - B", "A ∩ B'")]
         [DataRow("A * A", "A")]
         [DataRow("B + B", "B")]
         [DataRow("C + U", "U")]

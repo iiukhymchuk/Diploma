@@ -1,6 +1,8 @@
-﻿using Superpower;
+﻿using DiscreteMath.Core.Language;
+using DiscreteMath.Core.Structs;
+using Superpower;
 
-namespace SetTheory
+namespace DiscreteMath.Core.Pipeline
 {
     public class Rule
     {

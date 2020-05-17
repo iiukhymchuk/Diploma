@@ -1,8 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SetTheory;
 using Superpower.Model;
 using System.Collections.Generic;
 using System.Linq;
+using DiscreteMath.Core.Language;
+using DiscreteMath.Core.Structs;
 
 namespace Tests.SetTheory
 {

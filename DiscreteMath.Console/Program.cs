@@ -1,4 +1,5 @@
-﻿using SetTheory;
+﻿using DiscreteMath.Core.Pipeline;
+using DiscreteMath.Core.Structs;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -36,7 +37,7 @@ namespace ConsoleApp
         {
             try
             {
-                var result = Pipeline.Process(input);
+                var result = Processor.Process(input);
                 WriteResult(input, result);
             }
             catch (Exception ex)

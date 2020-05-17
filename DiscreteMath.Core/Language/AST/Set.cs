@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace SetTheory
+namespace DiscreteMath.Core.Language
 {
     [DebuggerDisplay("{Debug}")]
     public class Set : Expression

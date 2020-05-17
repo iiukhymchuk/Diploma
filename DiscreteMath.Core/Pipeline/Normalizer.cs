@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using DiscreteMath.Core.Language;
+using DiscreteMath.Core.Structs;
+using System.Collections.Generic;
 using System.Linq;
 
-namespace SetTheory
+namespace DiscreteMath.Core.Pipeline
 {
     class Normalizer
     {
@@ -10,7 +12,7 @@ namespace SetTheory
 
         public Normalizer(ISettings settings)
         {
-            var defaultSettings = new DefaultSettings();
+            ISettings defaultSettings = new DefaultSettings();
             intersection = settings.Intersection ?? defaultSettings.Intersection;
             union = settings.Union ?? defaultSettings.Union;
         }
@@ -130,7 +132,7 @@ namespace SetTheory
         }
 
         bool IsParensType(Expression expr) => expr.Type == typeof(Parens);
-        bool IsOperatorType(Expression expr) => expr.Type == typeof(Operation);
+        bool IsOperatorType(Expression expr) => expr is Operation;
         bool OnlyChildIsOperator(Expression expr) => expr.Children.Length == 1 && IsOperatorType(expr.Children[0]);
         bool HasValue(Expression expr, string value) => expr.Value == value;
         bool AnyChildHasValue(Expression expr, string value) => expr.Children.Any(x => x.Value == value);

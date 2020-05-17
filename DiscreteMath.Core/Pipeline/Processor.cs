@@ -1,9 +1,10 @@
-﻿using Superpower.Model;
+﻿using DiscreteMath.Core.Language;
+using DiscreteMath.Core.Structs;
 using System.Collections.Generic;
 
-namespace SetTheory
+namespace DiscreteMath.Core.Pipeline
 {
-    public class Pipeline
+    public class Processor
     {
         public static Result<List<SimplificationDescription>> Process(string input)
         {
@@ -37,7 +38,7 @@ namespace SetTheory
             return new Result<List<SimplificationDescription>>(result);
         }
 
-        static int GetErrorIndex(Position position)
+        static int GetErrorIndex(Superpower.Model.Position position)
         {
             return position.HasValue && position.Line == 1
                 ? position.Column - 1

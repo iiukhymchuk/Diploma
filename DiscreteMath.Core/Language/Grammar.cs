@@ -1,8 +1,10 @@
-﻿using Superpower;
+﻿using DiscreteMath.Core.Language.AST;
+using DiscreteMath.Core.Structs;
+using Superpower;
 using Superpower.Parsers;
 using System;
 
-namespace SetTheory
+namespace DiscreteMath.Core.Language
 {
     using ExpressionParser = TokenListParser<TokenType, Expression>;
 
@@ -17,14 +19,14 @@ namespace SetTheory
         ExpressionParser PrefixNegation { get; }
         ExpressionParser PostfixNegation { get; }
         ExpressionParser Term { get; }
+        ExpressionParser Difference { get; }
         ExpressionParser Intersection { get; }
         ExpressionParser Union { get; }
-        //TokenListParser<TokenType, string> Difference { get; }
-        //TokenListParser<TokenType, string> SymmetricDifference { get; }
+        ExpressionParser SymmetricDifference { get; }
 
         public Grammar(ISettings settings)
         {
-            var defaultSettings = new DefaultSettings();
+            ISettings defaultSettings = new DefaultSettings();
 
             var universeSign = settings.UniverseSign ?? defaultSettings.UniverseSign;
             var emptySetSign = settings.EmptySetSign ?? defaultSettings.EmptySetSign;
@@ -60,16 +62,22 @@ namespace SetTheory
                 from tokens in Token.EqualTo(TokenType.PostfixNegation).AtLeastOnce()
                 select CreateNegationOperation(negationSign, isPrefixNegation, factor, tokens.Length);
             Term = PostfixNegation.Try().Or(PrefixNegation).Try().Or(Factor);
-            //Difference = Token.EqualTo(TokenType.Difference).Select(_ => differenceSign);
-            //SymmetricDifference = Token.EqualTo(TokenType.SymmetricDifference).Select(_ => symmetricDifferenceSign);
+            Difference = Parse.Chain(
+                Token.EqualTo(TokenType.Difference).Select(_ => differenceSign),
+                Term,
+                (value, child1, child2) => new Difference(value, child1, child2));
             Intersection = Parse.Chain(
                 Token.EqualTo(TokenType.Intersection).Select(_ => intersectionSign),
-                Term,
-                CreateBinaryOperation());
+                Difference,
+                (value, child1, child2) => new Intersection(value, child1, child2));
             Union = Parse.Chain(
                 Token.EqualTo(TokenType.Union).Select(_ => unionSign),
                 Intersection,
-                CreateBinaryOperation());
+                (value, child1, child2) => new Union(value, child1, child2));
+            SymmetricDifference = Parse.Chain(
+                Token.EqualTo(TokenType.SymmetricDifference).Select(_ => symmetricDifferenceSign),
+                Union,
+                (value, child1, child2) => new SymmetricDifference(value, child1, child2));
         }
 
         Expression CreateNegationOperation(string value, bool isPrefix, Expression expression, int count)
@@ -84,9 +92,6 @@ namespace SetTheory
             return CreateNegationOperation(value, isPrefix, negation, --count);
         }
 
-        Func<string, Expression, Expression, Expression> CreateBinaryOperation()
-            => (value, child1, child2) => new Operation(value, child1, child2);
-
-        public ExpressionParser BuildTree => Union.AtEnd().Select(x => (Expression) new Tree("Tree", x));
+        public ExpressionParser BuildTree => SymmetricDifference.AtEnd().Select(x => (Expression)new Tree("Tree", x));
     }
 }

@@ -1,8 +1,9 @@
-﻿using System;
+﻿using DiscreteMath.Core.Language;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SetTheory
+namespace DiscreteMath.Core.Pipeline
 {
     static class Utils
     {
@@ -12,7 +13,7 @@ namespace SetTheory
 
             if (length == 1) return list.Select(t => new List<T> { t }).ToList();
 
-            return GetPermutations(list, length - 1)
+            return list.GetPermutations(length - 1)
                 .SelectMany(
                     t => list.Where(e => !t.Contains(e)),
                     (t1, t2) => t1.Concat(new List<T> { t2 }).ToList())
@@ -51,7 +52,7 @@ namespace SetTheory
             }
         }
 
-    internal static bool ExprEquals(Expression first, Expression second)
+        internal static bool ExprEquals(Expression first, Expression second)
         {
             if (first.Type != second.Type) return false;
             if (first.Value != second.Value) return false;

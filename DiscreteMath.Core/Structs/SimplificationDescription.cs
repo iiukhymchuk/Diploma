@@ -1,4 +1,4 @@
-﻿namespace SetTheory
+﻿namespace DiscreteMath.Core.Structs
 {
     public class SimplificationDescription
     {

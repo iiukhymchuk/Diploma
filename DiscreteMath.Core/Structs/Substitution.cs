@@ -1,4 +1,6 @@
-﻿namespace SetTheory
+﻿using DiscreteMath.Core.Language;
+
+namespace DiscreteMath.Core.Structs
 {
     public class Substitution
     {

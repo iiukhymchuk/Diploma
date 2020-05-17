@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using DiscreteMath.Core.Structs;
+using System.Collections.Generic;
 
-namespace SetTheory
+namespace DiscreteMath.Core.Pipeline
 {
     class Printer
     {

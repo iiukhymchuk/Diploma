@@ -153,6 +153,15 @@ app {
                 color: var(--main-color-text-light);
             }
 
+.table thead {
+    background-color: var(--main-color-light);
+    color: var(--main-color-text);
+}
+
+.dark-text {
+    color: var(--main-color-light);
+}
+
 .content {
     padding-top: 1.1rem;
 }
@@ -172,27 +181,6 @@ app {
 .validation-message {
     color: red;
 }
-
-.loading-bar {
-    position: absolute;
-    top: calc(50% - 3px);
-    left: calc(50% - 250px);
-    width: 500px;
-    height: 6px;
-    background-color: var(--main-color-text-light);
-    overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2)
-}
-
-    .loading-bar::after {
-        content: '';
-        display: block;
-        width: 200px;
-        height: 100%;
-        background-color: var(--main-color-darker);
-        animation: progressbar-slide 1s infinite;
-        animation-timing-function: ease-in-out;
-    }
 
 #blazor-error-ui {
     background: lightyellow;

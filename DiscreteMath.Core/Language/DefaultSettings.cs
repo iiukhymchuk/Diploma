@@ -1,4 +1,4 @@
-﻿namespace SetTheory
+﻿namespace DiscreteMath.Core.Language
 {
     public class DefaultSettings : ISettings
     {
@@ -13,15 +13,6 @@
         public char[] PostfixNegations { get; } = new[] { '\'' };
         public char[] LParens { get; } = new[] { '(' };
         public char[] RParens { get; } = new[] { ')' };
-
-        public string UniverseSign => UniverseSets[0].ToString();
-        public string EmptySetSign => EmptySets[0].ToString();
         public bool IsPrefixNegation { get; } = false;
-        public string PostfixNegation => PostfixNegations[0].ToString();
-        public string PrefixNegation => PrefixNegations[0].ToString();
-        public string Union => Unions[0].ToString();
-        public string Intersection => Intersections[0].ToString();
-        public string Difference => Differences[0].ToString();
-        public string SymmetricDifference => SymmetricDifferences[0].ToString();
     }
 }

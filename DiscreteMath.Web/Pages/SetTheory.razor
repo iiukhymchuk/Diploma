@@ -1,3 +1,75 @@
 ﻿@page "/settheory"
 
-<h1>Set Theory</h1>
+@using DiscreteMath.Core.Structs
+@using DiscreteMath.Core.Pipeline
+@using DiscreteMath.Web.Models
+
+<h1>Expression Simplification</h1>
+
+<br />
+<br />
+
+<EditForm Model="@inputModel" OnValidSubmit="async () => await HandleValidSubmit()">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="input-group mb-3">
+        <InputText @bind-Value="inputModel.Value"
+                   class="form-control"
+                   placeholder="Expression" />
+        <div class="input-group-append">
+            <button class="btn btn-primary" type="submit">Simplify</button>
+        </div>
+    </div>
+</EditForm>
+
+<br />
+
+<div hidden=@hideResults>
+    @if (result.HasValue)
+    {
+        <h3>Result</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Expression</th>
+                    <th scope="col">Simplification Rule</th>
+                    <th scope="col">Substitutions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var simplification in result.Value)
+                {
+                    <tr>
+                        <td scope="col" class="dark-text">@simplification.RuleDescription</td>
+                        <td scope="col">@simplification.SimplifiedExpression</td>
+                        <td scope="col" class="dark-text">@simplification.AppliedRule</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="d-flex justify-content-center">
+            <div class="spinner-border text-secondary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    bool hideResults = true;
+    SetSimplificationModel inputModel = new SetSimplificationModel();
+    Result<List<SimplificationDescription>> result = Result<List<SimplificationDescription>>.Empty();
+
+    async Task HandleValidSubmit()
+    {
+        hideResults = false;
+        result = Result<List<SimplificationDescription>>.Empty();
+        this.StateHasChanged();
+        await Task.Delay(42);
+        result = await Task.Run(() => Processor.Process(inputModel.Value));
+    }
+}

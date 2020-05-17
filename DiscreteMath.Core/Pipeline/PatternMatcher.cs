@@ -1,8 +1,11 @@
-﻿using System;
+﻿using DiscreteMath.Core.Language;
+using DiscreteMath.Core.Language.AST;
+using DiscreteMath.Core.Structs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SetTheory
+namespace DiscreteMath.Core.Pipeline
 {
     class PatternMatcher
     {
@@ -36,7 +39,7 @@ namespace SetTheory
                             substitutions.Add(sub);
                         }
 
-                        if (substitutions.Any() && (substitutions.Count() >= MaxSubstitutionsPerRun))
+                        if (substitutions.Any() && substitutions.Count() >= MaxSubstitutionsPerRun)
                         {
                             var simplest = substitutions.OrderBy(CountSubstitutionSimplicity).First();
 
@@ -71,7 +74,7 @@ namespace SetTheory
 
             foreach (var child in expr.IterateDFSPostOrder().SkipWhile(x => !ShouldTake(x)))
             {
-                if (child.Type == typeof(Operation))
+                if (child.Type == typeof(Intersection) || child.Type == typeof(Union))
                 {
                     foreach (var p in child.Children
                         .GetPermutations(child.Children.Length)
@@ -167,7 +170,7 @@ namespace SetTheory
                 if (IsVariable(pattern))
                 {
                     var sub = substitutionsDictionary[pattern.ToString()];
-                    if (sub.Type == typeof(Operation))
+                    if (sub is Operation)
                         sub = new Parens(sub);
 
                     pattern = sub;

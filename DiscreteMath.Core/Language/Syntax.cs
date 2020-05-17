@@ -1,8 +1,9 @@
-﻿using Superpower;
+﻿using DiscreteMath.Core.Structs;
+using Superpower;
 using Superpower.Parsers;
 using Superpower.Tokenizers;
 
-namespace SetTheory
+namespace DiscreteMath.Core.Language
 {
     interface IProvideTokenizer
     {

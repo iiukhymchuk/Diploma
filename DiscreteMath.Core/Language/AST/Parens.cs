@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace SetTheory
+namespace DiscreteMath.Core.Language
 {
     [DebuggerDisplay("{Debug}")]
     public class Parens : Expression

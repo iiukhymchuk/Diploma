@@ -1,12 +1,16 @@
 ﻿using System.Collections.Generic;
 
-namespace SetTheory
+namespace DiscreteMath.Core.Pipeline
 {
     public class Rules
     {
         readonly static List<Rule> rules =
             new List<Rule>
             {
+                new Rule("_A - O = _A", "Nutral rule"),
+                new Rule("_A - _A = O", "Own inverse rule"),
+                new Rule("_A △ O = _A", "Nutral rule"),
+                new Rule("_A △ _A = O", "Own inverse rule"),
                 new Rule("_A * _A = _A", "Indempodent rule"),
                 new Rule("_A + _A = _A", "Indempodent rule"),
                 new Rule("_A + U = U", "Domination rule"),
@@ -25,9 +29,10 @@ namespace SetTheory
                 new Rule("_A * (_A + _B) = _A", "Absorption rule"),
                 new Rule("(_A + _B)' = (_A' * _B')", "De Morgan's rule"),
                 new Rule("(_A * _B)' = (_A' + _B')", "De Morgan's rule"),
+                new Rule("_A - _B = _A * _B'", "Difference definition"),
+                new Rule("_A △ _B = ((_A - _B) + (_B - _A))", "Symmetric difference definition"),
                 new Rule("_A + (_B * _C) = (_A + _B) * (_A + _C)", "Distributive rule"),
                 new Rule("_A * (_B + _C) = (_A * _B) + (_A * _C)", "Distributive rule"),
-                // take the simplest result in list of results
                 new Rule("_A' * _B' = (_A + _B)'", "De Morgan's rule"),
                 new Rule("_A' + _B' = (_A * _B)'", "De Morgan's rule"),
             };

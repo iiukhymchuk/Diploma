@@ -1,7 +1,8 @@
-﻿using System;
+﻿using DiscreteMath.Core.Language;
+using System;
 using System.Collections.Generic;
 
-namespace SetTheory
+namespace DiscreteMath.Core.Pipeline
 {
     public static class Search
     {
@@ -10,7 +11,7 @@ namespace SetTheory
         public static IEnumerable<Expression> IterateDFSPostOrder(this Expression expr)
         {
             foreach (var child in expr.Children)
-                foreach (var subChild in IterateDFSPostOrder(child))
+                foreach (var subChild in child.IterateDFSPostOrder())
                     yield return subChild;
             yield return expr;
         }
@@ -19,7 +20,7 @@ namespace SetTheory
         {
             yield return expr;
             foreach (var child in expr.Children)
-                foreach (var subChild in IterateBFSPostOrder(child))
+                foreach (var subChild in child.IterateBFSPostOrder())
                     yield return subChild;
         }
 

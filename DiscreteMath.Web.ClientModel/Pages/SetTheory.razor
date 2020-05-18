@@ -3,6 +3,7 @@
 @using DiscreteMath.Core.Structs
 @using DiscreteMath.Core.Pipeline
 @using DiscreteMath.Web.Models
+@using DiscreteMath.Core.Language
 
 <h1>Expression Simplification</h1>
 
@@ -11,18 +12,48 @@
 
 <EditForm Model="@inputModel" OnValidSubmit="async () => await HandleValidSubmit()">
     <DataAnnotationsValidator />
-    <ValidationSummary />
 
     <div class="input-group mb-3">
         <InputText @bind-Value="inputModel.Value"
-                   class="form-control"
-                   placeholder="Expression" />
-        <div class="input-group-append">
-            <button class="btn btn-primary" type="submit">Simplify</button>
-        </div>
+                   type="text"
+                   class="form-control col-6"
+                   placeholder="Expression"
+                   id="evaluation-input"/>
+        <button class="btn btn-primary border-left border" type="submit">Simplify</button>
     </div>
+
+    <ValidationSummary />
 </EditForm>
 
+<br />
+<div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+    <div class="btn-group mr-5" role="group" aria-label="First row">
+        <button type="button" class="btn btn-primary" @onclick="@(() => AddSymbol("A"))">A</button>
+        <button type="button" class="btn btn-primary" @onclick="@(() => AddSymbol("B"))">B</button>
+        <button type="button" class="btn btn-primary" @onclick="@(() => AddSymbol("C"))">C</button>
+        <button type="button" class="btn btn-primary" @onclick="@(() => AddSymbol("D"))">D</button>
+        <button type="button" class="btn btn-primary" @onclick="@(() => AddSymbol("E"))">E</button>
+        <button type="button" class="btn btn-primary" @onclick="@(() => AddSymbol("Ω"))">Ω</button>
+        <button type="button" class="btn btn-primary" @onclick="@(() => AddSymbol("∅"))">∅</button>
+    </div>
+    <div class="btn-group mr-5">
+        <button type="button" class="btn btn-primary" @onclick="@(() => RemoveSymbol())">Erase</button>
+    </div>
+</div>
+<div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+    <div class="btn-group mr-5" role="group" aria-label="Second row">
+        <button type="button" class="btn btn-primary" @onclick="@(() => AddSymbol("⋂"))">⋂</button>
+        <button type="button" class="btn btn-primary" @onclick="@(() => AddSymbol("⋃"))">⋃</button>
+        <button type="button" class="btn btn-primary" @onclick="@(() => AddSymbol("'"))">'</button>
+        <button type="button" class="btn btn-primary" @onclick="@(() => AddSymbol("\\"))">\</button>
+        <button type="button" class="btn btn-primary" @onclick="@(() => AddSymbol("△"))">△</button>
+        <button type="button" class="btn btn-primary" @onclick="@(() => AddSymbol("("))">(</button>
+        <button type="button" class="btn btn-primary" @onclick="@(() => AddSymbol(")"))">)</button>
+    </div>
+    <div class="btn-group mr-5">
+        <button type="button" class="btn btn-primary" @onclick="@(() => ClearInput())">Clear</button>
+    </div>
+</div>
 <br />
 
 <div hidden=@hideResults>
@@ -70,6 +101,23 @@
         result = Result<List<SimplificationDescription>>.Empty();
         this.StateHasChanged();
         await Task.Delay(42);
-        result = await Task.Run(() => Processor.Process(inputModel.Value));
+        result = await Task.Run(() => Processor.Process(inputModel.Value, new DefaultSettings()));
+    }
+
+    void AddSymbol(string input)
+    {
+        inputModel.Value ??= string.Empty;
+        inputModel.Value += input + " ";
+    }
+
+    void RemoveSymbol()
+    {
+        inputModel.Value = inputModel.Value.Trim();
+        inputModel.Value = inputModel.Value.Remove(inputModel.Value.Length - 1);
+    }
+
+    void ClearInput()
+    {
+        inputModel.Value = string.Empty;
     }
 }

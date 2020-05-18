@@ -1,6 +1,7 @@
 ﻿using DiscreteMath.Core.Language;
 using DiscreteMath.Core.Language.AST;
 using DiscreteMath.Core.Structs;
+using DiscreteMath.Core.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -129,7 +130,7 @@ namespace DiscreteMath.Core.Pipeline
             {
                 var exists = matchSubstitutions.TryGetValue(pattern.Value, out var substitution);
                 if (exists)
-                    return Utils.ExprEquals(toBeMatched, substitution);
+                    return TreeUtils.ExprEquals(toBeMatched, substitution);
 
                 matchSubstitutions[pattern.ToString()] = toBeMatched.Copy();
                 return true;
@@ -144,7 +145,7 @@ namespace DiscreteMath.Core.Pipeline
             if (toBeMatched.Children.Length < pattern.Children.Length)
                 return false;
 
-            return Utils.CollectionsEquals(toBeMatched.Children, pattern.Children, (a, b) => CheckMatch(a, b, matchSubstitutions));
+            return TreeUtils.CollectionsEquals(toBeMatched.Children, pattern.Children, (a, b) => CheckMatch(a, b, matchSubstitutions));
         }
 
         static Substitution Substitute(
@@ -184,7 +185,7 @@ namespace DiscreteMath.Core.Pipeline
                 var result = tree.Copy();
                 resulting = resulting.Copy();
                 result.DFSPostOrder(
-                    x => x.Children = x.Children.Select(y => Utils.ExprEquals(y, initial) ? resulting : y).ToArray());
+                    x => x.Children = x.Children.Select(y => TreeUtils.ExprEquals(y, initial) ? resulting : y).ToArray());
                 return result;
             }
         }

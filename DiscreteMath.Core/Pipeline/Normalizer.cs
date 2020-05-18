@@ -1,5 +1,6 @@
 ﻿using DiscreteMath.Core.Language;
 using DiscreteMath.Core.Structs;
+using DiscreteMath.Core.Utils;
 using System.Collections.Generic;
 using System.Linq;
 

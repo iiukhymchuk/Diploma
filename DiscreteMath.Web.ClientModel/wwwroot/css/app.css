@@ -23,6 +23,8 @@ a, .btn-link {
     color: var(--main-color-text-dark);
     background-color: var(--main-color-light);
     border-color: var(--main-color-lighter);
+    min-width: 60px !important;
+    display: inline-block !important;
 }
 
     .btn-primary:hover {

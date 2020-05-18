@@ -10,7 +10,7 @@ namespace DiscreteMath.Core.Language
         Tokenizer<TokenType> GetTokenizer();
     }
 
-    class Syntax : IProvideTokenizer
+    public class Syntax : IProvideTokenizer
     {
         readonly TokenizerBuilder<TokenType> syntaxBuilder;
 
@@ -28,6 +28,7 @@ namespace DiscreteMath.Core.Language
 
         public SyntaxWithVariables(ISettings settings)
         {
+            var defaultSettings = new DefaultSettings();
             syntaxBuilder = new SyntaxBuilder(settings).Builder;
         }
 
@@ -43,22 +44,20 @@ namespace DiscreteMath.Core.Language
 
         internal SyntaxBuilder(ISettings settings)
         {
-            var defaultSettings = new DefaultSettings();
-
             Builder =
                 new TokenizerBuilder<TokenType>()
                 .Ignore(Span.WhiteSpace)
-                .Match(Character.In(settings.Sets ?? defaultSettings.Sets), TokenType.Set)
-                .Match(Character.In(settings.Unions ?? defaultSettings.Unions), TokenType.Union)
-                .Match(Character.In(settings.Intersections ?? defaultSettings.Intersections), TokenType.Intersection)
-                .Match(Character.In(settings.Differences ?? defaultSettings.Differences), TokenType.Difference)
-                .Match(Character.In(settings.SymmetricDifferences ?? defaultSettings.SymmetricDifferences), TokenType.SymmetricDifference)
-                .Match(Character.In(settings.PrefixNegations ?? defaultSettings.PrefixNegations), TokenType.PrefixNegation)
-                .Match(Character.In(settings.PostfixNegations ?? defaultSettings.PostfixNegations), TokenType.PostfixNegation)
-                .Match(Character.In(settings.LParens ?? defaultSettings.LParens), TokenType.LParen)
-                .Match(Character.In(settings.RParens ?? defaultSettings.RParens), TokenType.RParen)
-                .Match(Character.In(settings.UniverseSets ?? defaultSettings.UniverseSets), TokenType.UniverseSet)
-                .Match(Character.In(settings.EmptySets ?? defaultSettings.EmptySets), TokenType.EmptySet);
+                .Match(Character.In(settings.Sets), TokenType.Set)
+                .Match(Character.In(settings.Unions), TokenType.Union)
+                .Match(Character.In(settings.Intersections), TokenType.Intersection)
+                .Match(Character.In(settings.Differences), TokenType.Difference)
+                .Match(Character.In(settings.SymmetricDifferences), TokenType.SymmetricDifference)
+                .Match(Character.In(settings.PrefixNegations), TokenType.PrefixNegation)
+                .Match(Character.In(settings.PostfixNegations), TokenType.PostfixNegation)
+                .Match(Character.In(settings.LParens), TokenType.LParen)
+                .Match(Character.In(settings.RParens), TokenType.RParen)
+                .Match(Character.In(settings.UniverseSets), TokenType.UniverseSet)
+                .Match(Character.In(settings.EmptySets), TokenType.EmptySet);
         }
     }
 }

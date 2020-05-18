@@ -2,6 +2,7 @@
 using System.Linq;
 using DiscreteMath.Core.Language;
 using DiscreteMath.Core.Pipeline;
+using DiscreteMath.Core.Utils;
 
 namespace Tests.SetTheory
 {
@@ -65,7 +66,16 @@ namespace Tests.SetTheory
             var resultLines = interpeter.Interpretate((Tree)parseResult.Value);
 
             var actual = resultLines.Last().SimplifiedExpression.Trim();
-            Assert.AreEqual(expected, actual);
+
+            var actualTokens = tokenizer.TryTokenize(actual).Value;
+            var actualTree = grammar.BuildTree(actualTokens).Value;
+
+            var expectedTokens = tokenizer.TryTokenize(expected).Value;
+            var expectedTree = grammar.BuildTree(expectedTokens).Value;
+
+            var equal = TreeUtils.ExprEquals(expectedTree, actualTree);
+
+            Assert.IsTrue(equal);
         }
 
         [DataTestMethod]
@@ -77,6 +87,7 @@ namespace Tests.SetTheory
         [DataRow("(A' * (B + C)')'", "A ∪ B ∪ C")]
         [DataRow("(A + B + C) * (A + B' + C) * (A + C)'", "∅")]
         [DataRow("(A' ∪ C)' ∪ (B ∪ B ∩ C) ∩ (B' ∪ (B ∪ C)') ∪ (A' ∪ C)' ∪ A ∪ C ∩ (B ∪ C)", "C ∪ A")]
+        //[DataRow(@"(((A \ B) ⋂ (A \ C)) ⋃ ((B \ A) ⋂ (B \ C))  ⋃ ((C \ A) ⋂ (C \ B)))", "A")]
         public void InterpreterReturnsExpectedResults(string input, string expected)
         {
             var tokenizer = syntax.GetTokenizer();
@@ -85,7 +96,16 @@ namespace Tests.SetTheory
             var resultLines = interpeter.Interpretate(parseResult.Value);
 
             var actual = resultLines.Last().SimplifiedExpression.Trim();
-            Assert.AreEqual(expected, actual);
+
+            var actualTokens = tokenizer.TryTokenize(actual).Value;
+            var actualTree = grammar.BuildTree(actualTokens).Value;
+
+            var expectedTokens = tokenizer.TryTokenize(expected).Value;
+            var expectedTree = grammar.BuildTree(expectedTokens).Value;
+
+            var equal = TreeUtils.ExprEquals(expectedTree, actualTree);
+
+            Assert.IsTrue(equal);
         }
     }
 }

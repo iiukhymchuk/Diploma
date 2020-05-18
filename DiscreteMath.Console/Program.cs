@@ -1,4 +1,5 @@
-﻿using DiscreteMath.Core.Pipeline;
+﻿using DiscreteMath.Core.Language;
+using DiscreteMath.Core.Pipeline;
 using DiscreteMath.Core.Structs;
 using System;
 using System.Collections.Generic;
@@ -37,7 +38,7 @@ namespace ConsoleApp
         {
             try
             {
-                var result = Processor.Process(input);
+                var result = Processor.Process(input, new DefaultSettings());
                 WriteResult(input, result);
             }
             catch (Exception ex)

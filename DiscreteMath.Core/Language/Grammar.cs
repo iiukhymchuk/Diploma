@@ -26,18 +26,16 @@ namespace DiscreteMath.Core.Language
 
         public Grammar(ISettings settings)
         {
-            ISettings defaultSettings = new DefaultSettings();
-
-            var universeSign = settings.UniverseSign ?? defaultSettings.UniverseSign;
-            var emptySetSign = settings.EmptySetSign ?? defaultSettings.EmptySetSign;
-            var isPrefixNegation = settings.IsPrefixNegation || defaultSettings.IsPrefixNegation;
-            var prefixNegationSign = settings.PrefixNegation ?? defaultSettings.PrefixNegation;
-            var postfixNegationSign = settings.PostfixNegation ?? defaultSettings.PostfixNegation;
+            var universeSign = settings.UniverseSign;
+            var emptySetSign = settings.EmptySetSign;
+            var isPrefixNegation = settings.IsPrefixNegation;
+            var prefixNegationSign = settings.PrefixNegation;
+            var postfixNegationSign = settings.PostfixNegation;
             var negationSign = isPrefixNegation ? prefixNegationSign : postfixNegationSign;
-            var unionSign = settings.Union ?? defaultSettings.Union;
-            var intersectionSign = settings.Intersection ?? defaultSettings.Intersection;
-            var differenceSign = settings.Difference ?? defaultSettings.Difference;
-            var symmetricDifferenceSign = settings.SymmetricDifference ?? defaultSettings.SymmetricDifference;
+            var unionSign = settings.Union;
+            var intersectionSign = settings.Intersection;
+            var differenceSign = settings.Difference;
+            var symmetricDifferenceSign = settings.SymmetricDifference;
 
             Set = Token.EqualTo(TokenType.Set).Select(x => (Expression)new Set(x.ToStringValue()));
             UniverseSet = Token.EqualTo(TokenType.UniverseSet).Select(_ => (Expression)new Set(universeSign));

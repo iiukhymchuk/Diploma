@@ -1,17 +1,18 @@
 ﻿using DiscreteMath.Core.Language;
 using DiscreteMath.Core.Structs;
+using DiscreteMath.Core.Utils;
 using System.Collections.Generic;
 
 namespace DiscreteMath.Core.Pipeline
 {
     public class Processor
     {
-        public static Result<List<SimplificationDescription>> Process(string input)
+        public static Result<List<SimplificationDescription>> Process(string input, ISettings settings)
         {
-            var settings = new DefaultSettings(); // get settings from outside, not default
+            var combinedSettings = settings.Combine(new DefaultSettings());
             var rules = new Rules();
 
-            IProvideTokenizer syntax = new Syntax(settings); // inject
+            IProvideTokenizer syntax = new Syntax(combinedSettings); // inject
             var tokenizer = syntax.GetTokenizer();
             var tokensResult = tokenizer.TryTokenize(input);
             if (!tokensResult.HasValue)
@@ -22,7 +23,7 @@ namespace DiscreteMath.Core.Pipeline
                 return new Result<List<SimplificationDescription>>($"Syntax error for input '{token}'", errorIndex, token);
             }
 
-            var grammar = new Grammar(settings); // inject
+            var grammar = new Grammar(combinedSettings); // inject
             var parseResult = grammar.BuildTree(tokensResult.Value);
             if (!parseResult.HasValue)
             {
@@ -33,7 +34,7 @@ namespace DiscreteMath.Core.Pipeline
             }
 
             // work with errors
-            var interpreter = new Interpreter(new PatternMatcher(rules.GetRules()), new Normalizer(settings));
+            var interpreter = new Interpreter(new PatternMatcher(rules.GetRules()), new Normalizer(combinedSettings));
             var result = interpreter.Interpretate(parseResult.Value);
             return new Result<List<SimplificationDescription>>(result);
         }

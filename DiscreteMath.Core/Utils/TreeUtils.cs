@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DiscreteMath.Core.Pipeline
+namespace DiscreteMath.Core.Utils
 {
-    static class Utils
+    static class TreeUtils
     {
         internal static List<List<T>> GetPermutations<T>(this IEnumerable<T> list, int length)
         {

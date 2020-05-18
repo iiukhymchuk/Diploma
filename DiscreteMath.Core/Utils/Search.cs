@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace DiscreteMath.Core.Pipeline
+namespace DiscreteMath.Core.Utils
 {
     public static class Search
     {

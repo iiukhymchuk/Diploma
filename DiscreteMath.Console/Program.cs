@@ -47,7 +47,7 @@ namespace ConsoleApp
             }
         }
 
-        static void WriteResult(string input, Result<List<SimplificationDescription>> result)
+        static void WriteResult(string input, MyResult<List<SimplificationDescription>> result)
         {
             if (result.HasValue)
                 WriteResultLines(result.Value);

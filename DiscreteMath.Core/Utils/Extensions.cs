@@ -1,5 +1,4 @@
 ﻿using DiscreteMath.Core.Language;
-using DiscreteMath.Core.Structs;
 
 namespace DiscreteMath.Core.Utils
 {

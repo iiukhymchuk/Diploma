@@ -93,12 +93,12 @@
 @code {
     bool hideResults = true;
     SetSimplificationModel inputModel = new SetSimplificationModel();
-    Result<List<SimplificationDescription>> result = Result<List<SimplificationDescription>>.Empty();
+    MyResult<List<SimplificationDescription>> result = MyResult<List<SimplificationDescription>>.Empty();
 
     async Task HandleValidSubmit()
     {
         hideResults = false;
-        result = Result<List<SimplificationDescription>>.Empty();
+        result = MyResult<List<SimplificationDescription>>.Empty();
         this.StateHasChanged();
         await Task.Delay(42);
         result = await Task.Run(() => Processor.Process(inputModel.Value, new DefaultSettings()));

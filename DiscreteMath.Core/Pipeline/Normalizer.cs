@@ -18,7 +18,7 @@ namespace DiscreteMath.Core.Pipeline
             union = settings.Union ?? defaultSettings.Union;
         }
 
-        internal Result<Substitution> Normalize(Expression expr)
+        internal MyResult<Substitution> Normalize(Expression expr)
         {
             var copy = expr.Copy();
 
@@ -34,14 +34,14 @@ namespace DiscreteMath.Core.Pipeline
                 changed = true;
 
             if (changed)
-                return new Result<Substitution>(
+                return new MyResult<Substitution>(
                 new Substitution
                 {
                     ResultingExpression = copy,
                     Description = string.Join<string>($", ", descriptions.Distinct())
                 });
 
-            return Result<Substitution>.Empty();
+            return MyResult<Substitution>.Empty();
         }
 
         bool RemoveRedundantParens(Expression current)

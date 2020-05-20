@@ -82,7 +82,7 @@ namespace DiscreteMath.Core.Language
         {
             if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
 
-            var negation = new NegationOperation(value, expression, isPrefix);
+            var negation = new Complement(value, expression, isPrefix);
 
             if (count == 1)
                 return negation;

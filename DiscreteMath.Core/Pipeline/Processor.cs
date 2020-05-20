@@ -12,7 +12,7 @@ namespace DiscreteMath.Core.Pipeline
             var combinedSettings = settings.Combine(new DefaultSettings());
             var rules = new Rules();
 
-            IProvideTokenizer syntax = new Syntax(combinedSettings); // inject
+            IProvideTokenizer syntax = new Syntax(combinedSettings);
             var tokenizer = syntax.GetTokenizer();
             var tokensResult = tokenizer.TryTokenize(input);
             if (!tokensResult.HasValue)
@@ -23,7 +23,7 @@ namespace DiscreteMath.Core.Pipeline
                 return new MyResult<List<SimplificationDescription>>($"Syntax error for input '{token}'", errorIndex, token);
             }
 
-            var grammar = new Grammar(combinedSettings); // inject
+            var grammar = new Grammar(combinedSettings);
             var parseResult = grammar.BuildTree(tokensResult.Value);
             if (!parseResult.HasValue)
             {
@@ -34,7 +34,7 @@ namespace DiscreteMath.Core.Pipeline
             }
 
             // work with errors
-            var interpreter = new Interpreter(new PatternMatcher(rules.GetRules()), new Normalizer(combinedSettings));
+            var interpreter = new Interpreter(new PatternMatcher(rules.GetRules()), new Normalizer(combinedSettings), new Printer());
             var result = interpreter.Interpretate(parseResult.Value);
             return new MyResult<List<SimplificationDescription>>(result);
         }

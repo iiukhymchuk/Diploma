@@ -6,15 +6,15 @@ namespace DiscreteMath.Core.Pipeline
 {
     class Interpreter
     {
-        private readonly PatternMatcher patternMatcher;
-        private readonly Normalizer normalizer;
-        private readonly Printer printer;
+        readonly PatternMatcher patternMatcher;
+        readonly Normalizer normalizer;
+        readonly Printer printer;
 
-        public Interpreter(PatternMatcher patternMatcher, Normalizer normalizer)
+        public Interpreter(PatternMatcher patternMatcher, Normalizer normalizer, Printer printer)
         {
             this.patternMatcher = patternMatcher;
             this.normalizer = normalizer;
-            printer = new Printer();
+            this.printer = printer;
         }
 
         public List<SimplificationDescription> Interpretate(Expression expr)

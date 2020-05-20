@@ -77,7 +77,8 @@ namespace DiscreteMath.Web.ServerModel
                     AutoHideMenuBar = true,
                     Width = 1024,
                     Height = 768,
-                    Center = true
+                    Center = true,
+                    WebPreferences = new WebPreferences { NodeIntegration = false }
                 }));
         }
     }

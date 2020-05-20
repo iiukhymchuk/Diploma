@@ -1,6 +1,4 @@
-﻿using DiscreteMath.Core.Language;
-
-namespace DiscreteMath.Core.Structs
+﻿namespace DiscreteMath.Core.Language
 {
     public class Settings : ISettings
     {

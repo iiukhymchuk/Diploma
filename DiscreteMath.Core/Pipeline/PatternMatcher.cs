@@ -11,21 +11,23 @@ namespace DiscreteMath.Core.Pipeline
     class PatternMatcher
     {
         readonly List<Rule> rules;
-        const int MaxSubstitutionsPerRun = 32;
-        const double SubstitutionSimplicityConstant = 0.99d;
+        const int MaxSubstitutionsPerRun = 256;
+        const double SubstitutionSimplicityConstant = 0.45d;
 
         public PatternMatcher(List<Rule> rules)
         {
             this.rules = rules;
         }
 
-        internal Result<Substitution> Match(Expression expr, HashSet<string> used)
+        static Cache<Guid, string, SimplificationDescription> cache = new Cache<Guid, string, SimplificationDescription>();
+
+        internal MyResult<Substitution> Match(Expression expr, HashSet<string> used)
         {
-            var substitutionsLoolup = new HashSet<string>();
+            var substitutionsLookup = new HashSet<string>();
             var substitutions = new List<Substitution>();
 
             foreach (var tree in GetOperationPermutations(expr.Copy(true)))
-                foreach (var node in tree.IterateDFSPostOrder())
+                foreach (var node in tree.AsEnumerableDFSPostOrder())
                     foreach (var rule in rules)
                     {
                         var sub = MatchPattern(tree.Copy(), node, rule);
@@ -33,19 +35,23 @@ namespace DiscreteMath.Core.Pipeline
                         if (sub is null)
                             continue;
 
+                        if (rule.Precidence < 0.11d)
+                            return new MyResult<Substitution>(sub);
+
                         var stringRepresentation = sub.ResultingExpression.Debug;
-                        if (!used.Contains(stringRepresentation) && !substitutionsLoolup.Contains(stringRepresentation))
+                        if (!used.Contains(stringRepresentation) && !substitutionsLookup.Contains(stringRepresentation))
                         {
-                            substitutionsLoolup.Add(stringRepresentation);
+                            substitutionsLookup.Add(stringRepresentation);
                             substitutions.Add(sub);
                         }
 
                         if (substitutions.Any() && substitutions.Count() >= MaxSubstitutionsPerRun)
                         {
-                            var simplest = substitutions.OrderBy(CountSubstitutionSimplicity).First();
+                            var ordered = substitutions.OrderBy(x => x.Precidence).ThenBy(CountSubstitutionSimplicity);
+                            var simplest = ordered.First();
 
-                            if (CountSubstitutionSimplicity(simplest) < SubstitutionSimplicityConstant)
-                                return new Result<Substitution>(simplest);
+                            if (simplest.Precidence < SubstitutionSimplicityConstant)
+                                return new MyResult<Substitution>(simplest);
 
                             substitutions.Clear();
                             substitutions.Add(simplest);
@@ -53,9 +59,12 @@ namespace DiscreteMath.Core.Pipeline
                     }
 
             if (substitutions.Any())
-                return new Result<Substitution>(substitutions.OrderBy(CountSubstitutionSimplicity).First());
+            {
+                var simplest = substitutions.OrderBy(x => x.Precidence).ThenBy(CountSubstitutionSimplicity).First();
+                return new MyResult<Substitution>(simplest);
+            }
 
-            return Result<Substitution>.Empty();
+            return MyResult<Substitution>.Empty();
         }
 
         double CountSubstitutionSimplicity(Substitution substitution)
@@ -73,7 +82,7 @@ namespace DiscreteMath.Core.Pipeline
         {
             var guidIsMet = false;
 
-            foreach (var child in expr.IterateDFSPostOrder().SkipWhile(x => !ShouldTake(x)))
+            foreach (var child in expr.AsEnumerableDFSPostOrder().SkipWhile(x => !ShouldTake(x)))
             {
                 if (child.Type == typeof(Intersection) || child.Type == typeof(Union))
                 {
@@ -83,7 +92,7 @@ namespace DiscreteMath.Core.Pipeline
                         .SelectMany(x => x))
                     {
                         var copy = expr.Copy(true);
-                        var sub = copy.IterateDFSPostOrder().First(x => x.Id == child.Id);
+                        var sub = copy.AsEnumerableDFSPostOrder().First(x => x.Id == child.Id);
                         sub.Children = p.ToArray();
 
                         foreach (var tree in GetOperationPermutations(copy, sub.Id))
@@ -126,7 +135,7 @@ namespace DiscreteMath.Core.Pipeline
             Expression pattern,
             Dictionary<string, Expression> matchSubstitutions)
         {
-            if (IsVariable(pattern))
+            if (pattern.IsVariable())
             {
                 var exists = matchSubstitutions.TryGetValue(pattern.Value, out var substitution);
                 if (exists)
@@ -136,10 +145,10 @@ namespace DiscreteMath.Core.Pipeline
                 return true;
             }
 
-            if (!IsSameExpression(toBeMatched, pattern))
+            if (!toBeMatched.IsSameExpression(pattern))
                 return false;
 
-            if (!HasChildren(pattern))
+            if (!pattern.HasChildren())
                 return true;
 
             if (toBeMatched.Children.Length < pattern.Children.Length)
@@ -163,12 +172,13 @@ namespace DiscreteMath.Core.Pipeline
                 ResultingExpression = substitutedExpr,
                 InitialPart = partialTree,
                 ResultingPart = substitutedPattern,
-                Description = rule.Description
+                Description = rule.Description,
+                Precidence = rule.Precidence
             };
 
             Expression GetSubstitutedVariable(Expression pattern)
             {
-                if (IsVariable(pattern))
+                if (pattern.IsVariable())
                 {
                     var sub = substitutionsDictionary[pattern.ToString()];
                     if (sub is Operation)
@@ -189,10 +199,5 @@ namespace DiscreteMath.Core.Pipeline
                 return result;
             }
         }
-
-        static bool IsVariable(Expression pattern) => pattern.Value.StartsWith("_");
-        static bool HasChildren(Expression pattern) => pattern.Children.Length != 0;
-        static bool IsSameExpression(Expression expr1, Expression expr2)
-            => expr1.Type == expr2.Type && expr1.Value == expr2.Value;
     }
 }

@@ -9,5 +9,6 @@ namespace DiscreteMath.Core.Structs
         public Expression InitialPart { get; set; }
         public Expression ResultingPart { get; set; }
         public string Description { get; set; }
+        public double Precidence { get; set; }
     }
 }

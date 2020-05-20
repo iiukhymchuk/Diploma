@@ -72,5 +72,57 @@ namespace DiscreteMath.Core.Utils
                 .Select(pair => equationCriteria(pair.x, pair.y))
                 .All(match => match);
         }
+
+        internal static Expression SubstituteChildren(this Expression expr,
+            Func<Expression[], IEnumerable<Expression>> substitutionFunc)
+        {
+            foreach (var node in expr.AsEnumerableDFSPostOrder())
+                node.Children = substitutionFunc(node.Children).ToArray();
+
+            return expr;
+        }
+
+        internal static Expression SubstituteChildren(this Expression expr,
+            Func<Expression, Expression[], IEnumerable<Expression>> substitutionFunc)
+        {
+            foreach (var node in expr.AsEnumerableDFSPostOrder())
+                node.Children = substitutionFunc(node, node.Children).ToArray();
+
+            return expr;
+        }
+
+        internal static void DFSPostOrder(this Expression current, Action<Expression> action)
+            => DFSPostOrderInternal(current, action, new HashSet<Expression>());
+        internal static IEnumerable<Expression> AsEnumerableDFSPostOrder(this Expression expr)
+        {
+            foreach (var child in expr.Children)
+                foreach (var subChild in child.AsEnumerableDFSPostOrder())
+                    yield return subChild;
+            yield return expr;
+        }
+
+        internal static IEnumerable<Expression> IterateBFSPostOrder(this Expression expr)
+        {
+            yield return expr;
+            foreach (var child in expr.Children)
+                foreach (var subChild in child.IterateBFSPostOrder())
+                    yield return subChild;
+        }
+
+        static void DFSPostOrderInternal(
+            Expression current,
+            Action<Expression> action,
+            HashSet<Expression> visited)
+        {
+            if (visited.Contains(current))
+                return;
+
+            visited.Add(current);
+
+            foreach (var child in current.Children)
+                DFSPostOrderInternal(child, action, visited);
+
+            action?.Invoke(current);
+        }
     }
 }

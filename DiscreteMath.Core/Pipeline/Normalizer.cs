@@ -63,7 +63,7 @@ namespace DiscreteMath.Core.Pipeline
             expr.Children = expr.Children[0].Children;
             return true;
 
-            bool HasRedundant(Expression expr) => expr.Type == typeof(Tree) && IsParensType(expr.Children[0]);
+            bool HasRedundant(Expression expr) => expr.Type == typeof(Tree) && expr.Children[0].IsParensType();
         }
 
         bool RemoveParensForNotOperators(Expression expr)
@@ -81,7 +81,7 @@ namespace DiscreteMath.Core.Pipeline
                         .ToArray();
                     changed = true;
                 }
-                bool HasRedundant(Expression expr) => IsParensType(expr) && !OnlyChildIsOperator(expr);
+                bool HasRedundant(Expression expr) => expr.IsParensType() && !expr.OnlyChildIsOperator();
             }
         }
 
@@ -94,7 +94,7 @@ namespace DiscreteMath.Core.Pipeline
 
             void Remove(Expression expr, string value, ref bool chaged)
             {
-                if (!HasValue(expr, value))
+                if (!expr.HasValue(value))
                     return;
 
                 if (expr.Children.Any(child => HasRedundant(child)))
@@ -104,7 +104,7 @@ namespace DiscreteMath.Core.Pipeline
                         .ToArray();
                     changed = true;
                 }
-                bool HasRedundant(Expression expr) => IsParensType(expr) && AnyChildHasValue(expr, value);
+                bool HasRedundant(Expression expr) => expr.IsParensType() && expr.AnyChildHasValue(value);
             }
         }
 
@@ -119,23 +119,17 @@ namespace DiscreteMath.Core.Pipeline
 
             void Combine(Expression expr, string value)
             {
-                if (!HasValue(expr, value))
+                if (!expr.HasValue(value))
                     return;
 
-                if (expr.Children.Any(child => HasValue(child, value)))
+                if (expr.Children.Any(child => child.HasValue(value)))
                 {
                     combined = true;
                     expr.Children = expr.Children
-                        .SelectMany(x => HasValue(x, value) ? x.Children : new[] { x })
+                        .SelectMany(x => x.HasValue(value) ? x.Children : new[] { x })
                         .ToArray();
                 }
             }
         }
-
-        bool IsParensType(Expression expr) => expr.Type == typeof(Parens);
-        bool IsOperatorType(Expression expr) => expr is Operation;
-        bool OnlyChildIsOperator(Expression expr) => expr.Children.Length == 1 && IsOperatorType(expr.Children[0]);
-        bool HasValue(Expression expr, string value) => expr.Value == value;
-        bool AnyChildHasValue(Expression expr, string value) => expr.Children.Any(x => x.Value == value);
     }
 }

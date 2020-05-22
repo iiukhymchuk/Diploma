@@ -1,23 +1,22 @@
-﻿using System.Diagnostics;
-
-namespace DiscreteMath.Core.Language
+﻿namespace DiscreteMath.Core.Language
 {
-    [DebuggerDisplay("{Debug}")]
     public class Tree : Expression
     {
-        public Tree(string value, Expression child)
+        const string TreeValue = "Tree";
+
+        public Tree(Expression child)
         {
-            Value = value;
+            Value = TreeValue;
             Children = new[] { child };
         }
 
         public override string Value { get; }
         public override Expression[] Children { get; set; }
 
-        public override Expression Copy(bool copyId = false)
-            => new Tree(Value, Children[0].Copy(copyId));
-
+        public override Expression Clone() => new Tree(Children[0].Clone());
+        public override Expression Copy() => new Tree(Children[0].Copy());
         public override string ToString() => $"{Children[0]} ";
-        public override string Debug => Children[0].Debug;
+
+        public override Tree AsTree() => this;
     }
 }

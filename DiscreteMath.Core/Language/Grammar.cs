@@ -1,5 +1,4 @@
-﻿using DiscreteMath.Core.Language.AST;
-using DiscreteMath.Core.Structs;
+﻿using DiscreteMath.Core.Structs;
 using Superpower;
 using Superpower.Parsers;
 using System;
@@ -45,7 +44,7 @@ namespace DiscreteMath.Core.Language
                 from lparen in Token.EqualTo(TokenType.LParen)
                 from expr in Parse.Ref(() => Union)
                 from rparen in Token.EqualTo(TokenType.RParen)
-                select (Expression)new Parens(expr);
+                select expr;
             Factor = Set.Try()
                .Or(UniverseSet).Try()
                .Or(EmptySet).Try()
@@ -82,7 +81,7 @@ namespace DiscreteMath.Core.Language
         {
             if (count < 1) throw new ArgumentOutOfRangeException(nameof(count));
 
-            var negation = new Complement(value, expression, isPrefix);
+            var negation = new Negation(value, expression, isPrefix);
 
             if (count == 1)
                 return negation;
@@ -90,6 +89,6 @@ namespace DiscreteMath.Core.Language
             return CreateNegationOperation(value, isPrefix, negation, --count);
         }
 
-        public ExpressionParser BuildTree => SymmetricDifference.AtEnd().Select(x => (Expression)new Tree("Tree", x));
+        public ExpressionParser BuildTree => SymmetricDifference.AtEnd();
     }
 }

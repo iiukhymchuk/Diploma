@@ -1,29 +1,40 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace DiscreteMath.Core.Utils
 {
-    public class Cache<TKey, TSecondaryKey, TValue>
+    class Cache<TKey, TSecondaryKey, TValue>
     {
-        private readonly Dictionary<TKey, Dictionary<TSecondaryKey, TValue>> _cache = new Dictionary<TKey, Dictionary<TSecondaryKey, TValue>>();
+        readonly Dictionary<TKey, Dictionary<TSecondaryKey, TValue>> cache = new Dictionary<TKey, Dictionary<TSecondaryKey, TValue>>();
 
-        public void Store(TKey key, TSecondaryKey secondaryKey, TValue value)
+        internal TValue GetCachedOrExecute(TKey key, TSecondaryKey secondaryKey, Func<TValue> func)
         {
-            if (!_cache.TryGetValue(key, out _))
-                _cache[key] = new Dictionary<TSecondaryKey, TValue>();
+            if (TryGetValue(key, secondaryKey, out var value))
+                return value;
 
-            _cache[key][secondaryKey] = value;
+            var result = func();
+            Store(key, secondaryKey, result);
+            return result;
         }
 
-        public bool TryGetValue(TKey key, TSecondaryKey secondaryKey, out TValue value)
+        bool TryGetValue(TKey key, TSecondaryKey secondaryKey, out TValue value)
         {
-            if (!_cache.ContainsKey(key) || !_cache[key].ContainsKey(secondaryKey))
+            if (!cache.ContainsKey(key) || !cache[key].ContainsKey(secondaryKey))
             {
                 value = default;
                 return false;
             }
 
-            value = _cache[key][secondaryKey];
+            value = cache[key][secondaryKey];
             return true;
+        }
+
+        void Store(TKey key, TSecondaryKey secondaryKey, TValue value)
+        {
+            if (!cache.TryGetValue(key, out _))
+                cache[key] = new Dictionary<TSecondaryKey, TValue>();
+
+            cache[key][secondaryKey] = value;
         }
     }
 }

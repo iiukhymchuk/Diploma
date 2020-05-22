@@ -24,11 +24,9 @@ namespace DiscreteMath.Core.Utils
             };
         }
 
-        internal static bool IsParensType(this Expression expr) => expr.Type == typeof(Parens);
-        internal static bool IsOperatorType(this Expression expr) => expr is Operation;
-        internal static bool OnlyChildIsOperator(this Expression expr) => expr.Children.Length == 1 && IsOperatorType(expr.Children[0]);
-        internal static bool HasValue(this Expression expr, string value) => expr.Value == value;
-        internal static bool AnyChildHasValue(this Expression expr, string value) => expr.Children.Any(x => x.Value == value);
+        internal static bool IsIntersection(this Expression expr) => expr.Type == typeof(Intersection);
+        internal static bool IsUnion(this Expression expr) => expr.Type == typeof(Union);
+        internal static bool IsSymmetricDifference(this Expression expr) => expr.Type == typeof(SymmetricDifference);
         internal static bool IsVariable(this Expression pattern) => pattern.Value.StartsWith("_");
         internal static bool HasChildren(this Expression pattern) => pattern.Children.Length != 0;
         internal static bool IsSameExpression(this Expression expr1, Expression expr2)

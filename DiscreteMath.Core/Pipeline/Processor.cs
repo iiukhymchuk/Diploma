@@ -34,8 +34,11 @@ namespace DiscreteMath.Core.Pipeline
             }
 
             // work with errors
-            var interpreter = new Interpreter(new PatternMatcher(rules.GetRules()), new Normalizer(combinedSettings), new Printer());
-            var result = interpreter.Interpretate(parseResult.Value);
+            var simplifier = new Simplifier(
+                new PatternMatcher(rules.GetRules(), new RuleApplier()),
+                new Normalizer(),
+                new Printer());
+            var result = simplifier.Run(parseResult.Value);
             return new MyResult<List<SimplificationDescription>>(result);
         }
 

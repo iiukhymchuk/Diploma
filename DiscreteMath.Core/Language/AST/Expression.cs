@@ -5,11 +5,14 @@ namespace DiscreteMath.Core.Language
     public abstract class Expression
     {
         public Type Type => GetType();
-        public Guid? Id { get; set; }
+        public Guid Id { get; protected set; }
+
         public abstract string Value { get; }
         public abstract Expression[] Children { get; set; }
-        public abstract Expression Copy(bool copyId = false);
+        public abstract Expression Clone();
+        public abstract Expression Copy();
         public abstract override string ToString();
-        public abstract string Debug { get; }
+
+        public virtual Tree AsTree() => new Tree(this);
     }
 }

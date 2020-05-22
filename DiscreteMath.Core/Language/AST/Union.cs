@@ -1,17 +1,29 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 
-namespace DiscreteMath.Core.Language.AST
+namespace DiscreteMath.Core.Language
 {
-    [DebuggerDisplay("{Debug}")]
-    public class Union : Operation
+    public class Union : Expression
     {
-        public Union(string value, params Expression[] children) : base(value, children) { }
+        public Union(string value, params Expression[] children)
+        {
+            Value = value;
+            Children = children;
+            Id = Guid.NewGuid();
+        }
 
-        public override Expression Copy(bool copyId = false)
-            => copyId
-                ? new Union(Value, Children.Select(x => x.Copy(copyId)).ToArray()) { Id = Id ?? Guid.NewGuid() }
-                : new Union(Value, Children.Select(x => x.Copy(copyId)).ToArray());
+        Union(string value, Expression[] children, Guid id)
+        {
+            Value = value;
+            Children = children;
+            Id = id;
+        }
+
+        public override string Value { get; }
+        public override Expression[] Children { get; set; }
+
+        public override Expression Clone() => new Union(Value, Children.Select(x => x.Clone()).ToArray(), Id);
+        public override Expression Copy() => new Union(Value, Children.Select(x => x.Copy()).ToArray());
+        public override string ToString() => $"({string.Join<string>($" {Value} ", Children.Select(x => x.ToString()))})";
     }
 }

@@ -4,28 +4,21 @@ using System.Collections.Generic;
 
 namespace DiscreteMath.Core.Pipeline
 {
-    class Interpreter
+    class Simplifier
     {
         readonly PatternMatcher patternMatcher;
         readonly Normalizer normalizer;
         readonly Printer printer;
 
-        public Interpreter(PatternMatcher patternMatcher, Normalizer normalizer, Printer printer)
+        public Simplifier(PatternMatcher patternMatcher, Normalizer normalizer, Printer printer)
         {
             this.patternMatcher = patternMatcher;
             this.normalizer = normalizer;
             this.printer = printer;
         }
 
-        public List<SimplificationDescription> Interpretate(Expression expr)
+        public List<SimplificationDescription> Run(Expression expr)
         {
-            printer.Add(
-                new Substitution
-                {
-                    ResultingExpression = expr,
-                    Description = "Initial value"
-                });
-
             var used = new HashSet<string>();
             while (true)
             {
@@ -33,12 +26,11 @@ namespace DiscreteMath.Core.Pipeline
 
                 if (normalizationResult.HasValue)
                 {
-                    var value = normalizationResult.Value;
-                    expr = value.ResultingExpression;
-                    used.Add(expr.Debug);
+                    expr = normalizationResult.Value.ResultingExpression;
+                    used.Add(expr.ToString());
 
-                    if (!string.IsNullOrEmpty(value.Description))
-                        printer.Add(value);
+                    if (!string.IsNullOrEmpty(normalizationResult.Value.Description))
+                        printer.Add(normalizationResult.Value);
                 }
 
                 var evaluationResult = patternMatcher.Match(expr, used);
@@ -46,7 +38,7 @@ namespace DiscreteMath.Core.Pipeline
                 if (evaluationResult.HasValue)
                 {
                     expr = evaluationResult.Value.ResultingExpression;
-                    used.Add(expr.Debug);
+                    used.Add(expr.ToString());
                     printer.Add(evaluationResult.Value);
                 }
 

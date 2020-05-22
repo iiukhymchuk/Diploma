@@ -7,20 +7,20 @@ using DiscreteMath.Core.Utils;
 namespace Tests.SetTheory
 {
     [TestClass]
-    public class InterpreterFixture
+    public class SimplifierFixture
     {
-        readonly Interpreter interpeter;
+        readonly Simplifier simplifier;
         readonly IProvideTokenizer syntax;
         readonly Grammar grammar;
         readonly ISettings settings;
 
-        public InterpreterFixture()
+        public SimplifierFixture()
         {
             settings = new DefaultSettings();
             var rules = new Rules();
             syntax = new Syntax(settings);
             grammar = new Grammar(settings);
-            interpeter = new Interpreter(new PatternMatcher(rules.GetRules()), new Normalizer(settings), new Printer());
+            simplifier = new Simplifier(new PatternMatcher(rules.GetRules(), new RuleApplier()), new Normalizer(), new Printer());
         }
 
         [DataTestMethod]
@@ -63,9 +63,9 @@ namespace Tests.SetTheory
             var tokenizer = syntax.GetTokenizer();
             var tokensResult = tokenizer.TryTokenize(input);
             var parseResult = grammar.BuildTree(tokensResult.Value);
-            var resultLines = interpeter.Interpretate((Tree)parseResult.Value);
+            var resultLines = simplifier.Run(parseResult.Value);
 
-            var actual = resultLines.Last().SimplifiedExpression.Trim();
+            var actual = resultLines.Last().SimplifiedExpression;
 
             var actualTokens = tokenizer.TryTokenize(actual).Value;
             var actualTree = grammar.BuildTree(actualTokens).Value;
@@ -73,30 +73,33 @@ namespace Tests.SetTheory
             var expectedTokens = tokenizer.TryTokenize(expected).Value;
             var expectedTree = grammar.BuildTree(expectedTokens).Value;
 
-            var equal = TreeUtils.ExprEquals(expectedTree, actualTree);
+            var equal = TreeUtils.StrictEquals(expectedTree, actualTree);
 
             Assert.IsTrue(equal, "Not equal");
         }
 
         [DataTestMethod]
         [DataRow("(A' + C)' + (B + B * C) * (B' + (B + C)')", "A ∩ C'")]
-        [DataRow("(A' + C)' + (B + B * C) * (B' + (B + C)') + (A' + C)'", "A ∩ C'")]
+        [DataRow("(A * B * C * D) + (D * C * B * A)", "A * B * C * D")]
         [DataRow("(A ∪ (B ∩ C) ∩ C')", "A")]
-        [DataRow("(A * B) + (A * B') + (A' * B)", "A ∪ B")]
-        [DataRow("(A * B')' + B", "A' ∪ B")]
         [DataRow("(A' * (B + C)')'", "A ∪ B ∪ C")]
-        [DataRow("(A + B + C) * (A + B' + C) * (A + C)'", "∅")]
-        [DataRow("(A' ∪ C)' ∪ (B ∪ B ∩ C) ∩ (B' ∪ (B ∪ C)') ∪ (A' ∪ C)' ∪ A ∪ C ∩ (B ∪ C)", "C ∪ A")]
         [DataRow(@"(A ⋃ B) \ (A \ (A ⋂ B))", "B")]
+        [DataRow("(A * B')' + B", "A' ∪ B")]
+        [DataRow("(B * C) + (B + B * C)", "B")]
+        [DataRow("(A' ∪ C)' ∪ (B ∪ B ∩ C) ∩ (B' ∪ (B ∪ C)') ∪ (A' ∪ C)' ∪ A ∪ C ∩ (B ∪ C)", "A ∪ C")]
+        [DataRow("(A' + C)' + (B + B * C) * (B' + (B + C)') + (A' + C)'", "A ∩ C'")]
+        [DataRow("(A * B) + (A * B') + (A' * B)", "A ∪ B")]
+        [DataRow("(A + B + C) * (A + B' + C) * (A + C)'", "∅")]
+
         //[DataRow(@"(((A \ B) ⋂ (A \ C)) ⋃ ((B \ A) ⋂ (B \ C))  ⋃ ((C \ A) ⋂ (C \ B)))", "A")]
         public void InterpreterReturnsExpectedResults(string input, string expected)
         {
             var tokenizer = syntax.GetTokenizer();
             var tokensResult = tokenizer.TryTokenize(input);
             var parseResult = grammar.BuildTree(tokensResult.Value);
-            var resultLines = interpeter.Interpretate(parseResult.Value);
+            var resultLines = simplifier.Run(parseResult.Value);
 
-            var actual = resultLines.Last().SimplifiedExpression.Trim();
+            var actual = resultLines.Last().SimplifiedExpression;
 
             var actualTokens = tokenizer.TryTokenize(actual).Value;
             var actualTree = grammar.BuildTree(actualTokens).Value;
@@ -104,10 +107,10 @@ namespace Tests.SetTheory
             var expectedTokens = tokenizer.TryTokenize(expected).Value;
             var expectedTree = grammar.BuildTree(expectedTokens).Value;
 
-            var equal = TreeUtils.ExprEquals(expectedTree, actualTree);
+            var equal = TreeUtils.StrictEquals(expectedTree, actualTree);
 
             Assert.IsTrue(equal, "Not equal");
-            Assert.IsTrue(resultLines.Count() < 30, "Too long solution");
+            Assert.IsTrue(resultLines.Count() < 40, "Too long solution");
         }
     }
 }

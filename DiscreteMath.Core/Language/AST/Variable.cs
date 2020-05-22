@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Diagnostics;
 
 namespace DiscreteMath.Core.Language
 {
-    [DebuggerDisplay("{Debug}")]
     public class Variable : Expression
     {
         public Variable(string value)
@@ -15,10 +13,8 @@ namespace DiscreteMath.Core.Language
         public override string Value { get; }
         public override Expression[] Children { get; set; }
 
-        public override Expression Copy(bool copyId = false)
-            => new Variable(Value);
-
+        public override Expression Clone() => new Variable(Value);
+        public override Expression Copy() => new Variable(Value);
         public override string ToString() => Value;
-        public override string Debug => Value;
     }
 }

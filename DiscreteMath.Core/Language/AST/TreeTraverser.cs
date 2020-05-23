@@ -14,6 +14,7 @@ namespace DiscreteMath.Core.Language
             yield return expr;
         }
 
+
         internal static Tree ChangeTree(this Tree tree, Func<Expression, bool> predicate, Func<Expression, Expression> func)
         {
             var copy = tree.Clone();
@@ -31,10 +32,13 @@ namespace DiscreteMath.Core.Language
             return (Tree)copy;
         }
 
-        internal static Tree OrderBy<T>(this Tree tree, Func<Expression, T> selector)
+        internal static Tree OrderBy<T>(
+            this Tree tree,
+            Func<Expression, bool> predicate,
+            Func<Expression, T> selector)
         {
             var copy = tree.Clone();
-            copy.DepthFirstSearchPostOrder(selector);
+            copy.DepthFirstSearchPostOrder(predicate, selector);
             return (Tree)copy;
         }
 
@@ -59,12 +63,16 @@ namespace DiscreteMath.Core.Language
             expr.Children = expr.Children.SelectMany(x => predicate(x, expr) ? func(x).ToArray() : new[] { x }).ToArray();
         }
 
-        static void DepthFirstSearchPostOrder<T>(this Expression expr, Func<Expression, T> selector)
+        static void DepthFirstSearchPostOrder<T>(
+            this Expression expr,
+            Func<Expression, bool> predicate,
+            Func<Expression, T> selector)
         {
             foreach (var child in expr.Children)
-                child.DepthFirstSearchPostOrder(selector);
+                child.DepthFirstSearchPostOrder(predicate, selector);
 
-            expr.Children = expr.Children.OrderBy(selector).ToArray();
+            if (predicate(expr))
+                expr.Children = expr.Children.OrderBy(selector).ToArray();
         }
     }
 }

@@ -71,5 +71,23 @@ namespace DiscreteMath.Core.Utils
                 .Zip(second, (x, y) => (x, y))
                 .All(pair => complyCriteria(pair.x, pair.y));
         }
+
+        internal static Expression SubstituteNode(this Expression expr, Guid id, Expression substitution)
+        {
+            return expr
+                .AsTree()
+                .ChangeTree(x => x.Id == id, _ => substitution)
+                .AsExpression();
+        }
+
+        internal static Expression SubstituteNode(this Expression expr,
+            Func<Expression, bool> predicate,
+            Func<Expression, Expression> selector)
+        {
+            return expr
+                .AsTree()
+                .ChangeTree(predicate, selector)
+                .AsExpression();
+        }
     }
 }

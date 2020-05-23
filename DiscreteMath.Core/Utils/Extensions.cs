@@ -1,4 +1,6 @@
 ﻿using DiscreteMath.Core.Language;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace DiscreteMath.Core.Utils
@@ -24,8 +26,31 @@ namespace DiscreteMath.Core.Utils
             };
         }
 
+        internal static IEnumerable<T> DistinctBy<T, T2>(this IEnumerable<T> source, Func<T, T2> selector)
+        {
+            return source
+                .GroupBy(x => selector(x))
+                .Select(x => x.First());
+        }
+
+        internal static void ForEach<T>(this IEnumerable<T> source, Action<T> action)
+        {
+            foreach (var item in source)
+            {
+                action(item);
+            }
+        }
+
+        internal static bool IsOperator(this Expression expr) =>
+            expr.IsIntersection()
+            || expr.IsUnion()
+            || expr.IsDifference()
+            || expr.IsNegation()
+            || expr.IsSymmetricDifference();
         internal static bool IsIntersection(this Expression expr) => expr.Type == typeof(Intersection);
         internal static bool IsUnion(this Expression expr) => expr.Type == typeof(Union);
+        internal static bool IsDifference(this Expression expr) => expr.Type == typeof(Difference);
+        internal static bool IsNegation(this Expression expr) => expr.Type == typeof(Negation);
         internal static bool IsSymmetricDifference(this Expression expr) => expr.Type == typeof(SymmetricDifference);
         internal static bool IsVariable(this Expression pattern) => pattern.Value.StartsWith("_");
         internal static bool HasChildren(this Expression pattern) => pattern.Children.Length != 0;

@@ -43,10 +43,11 @@ namespace DiscreteMath.Core.Language
                 new Rule("_A' * _B' = (_A + _B)'", "De Morgan's rule"),
                 new Rule("_A' + _B' = (_A * _B)'", "De Morgan's rule"),
                 new Rule("_A - _B = _A * _B'", "Difference definition"),
-                new Rule("_A △ _B = (A ∩ B') ∪ (A' ∩ B)", "Symmetric difference definition"),
+                new Rule("_A △ _B = (_A ∩ _B') ∪ (_A' ∩ _B)", "Symmetric difference definition"),
+                new Rule("(_A ∩ _B') ∪ (_A' ∩ _B) = _A △ _B", "Symmetric difference definition"),
 
-                new Rule("_A + (_B * _C) = (_A + _B) * (_A + _C)", "Distributive rule"),
-                new Rule("_A * (_B + _C) = (_A * _B) + (_A * _C)", "Distributive rule"),
+                //new Rule("_A + (_B * _C) = (_A + _B) * (_A + _C)", "Distributive rule"),
+                //new Rule("_A * (_B + _C) = (_A * _B) + (_A * _C)", "Distributive rule"),
             };
 
         public List<Rule> GetRules()

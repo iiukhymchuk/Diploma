@@ -12,6 +12,11 @@ namespace DiscreteMath.Core.Language
         public abstract Expression Clone();
         public abstract Expression Copy();
         public abstract override string ToString();
+        public Expression WithId(Guid id)
+        {
+            Id = id;
+            return this;
+        }
 
         public virtual Tree AsTree() => new Tree(this);
     }

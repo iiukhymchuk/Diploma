@@ -7,15 +7,17 @@ namespace DiscreteMath.Core.Pipeline
     {
         readonly List<SimplificationDescription> lines = new List<SimplificationDescription>();
 
-        internal void Add(Substitution value)
+        internal SimplificationDescription Add(Substitution value)
         {
             var appliedRulePresent = !(value.InitialPart is null || value.ResultingPart is null);
-            lines.Add(new SimplificationDescription
+            var simp = new SimplificationDescription
             {
                 SimplifiedExpression = value.ResultingExpression?.ToString() ?? string.Empty,
                 AppliedRule = appliedRulePresent ? $"{value.InitialPart} => {value.ResultingPart}" : string.Empty,
                 RuleDescription = value.Description
-            });
+            };
+            lines.Add(simp);
+            return simp;
         }
 
         internal List<SimplificationDescription> GetLines()

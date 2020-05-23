@@ -18,7 +18,7 @@ namespace DiscreteMath.Core.Pipeline
             this.ruleApplier = ruleApplier;
         }
 
-        internal MyResult<Substitution> Match(Expression expr, HashSet<string> used)
+        internal MyResult<Substitution> Match(Expression expr, HashSet<string> usedExpressions)
         {
             var copy = expr.Clone();
 
@@ -27,9 +27,8 @@ namespace DiscreteMath.Core.Pipeline
                     => permutation
                         .AsEnumerable()
                         .Where(x => x.HasChildren())
-                        .Select(x => new { NodeVariation = x, Permutation = permutation }))
-                .GroupBy(x => x.NodeVariation.ToString())
-                .Select(x => x.First())
+                        .Select(x => new { Permutation = permutation, NodeVariation = x }))
+                .DistinctBy(x => x.NodeVariation.ToString())
                 .ToList();
 
             foreach (var rule in rules)
@@ -37,27 +36,27 @@ namespace DiscreteMath.Core.Pipeline
                 {
                     var resultingPart = ruleApplier.ApplyRuleWithCache(item.NodeVariation, rule);
 
-                    if (resultingPart != null)
-                    {
-                        var resultingExpression = item.Permutation
-                            .AsTree()
-                            .ChangeTree(x => x.Id == item.NodeVariation.Id, _ => resultingPart)
-                            .AsExpression();
+                    if (resultingPart is null)
+                        continue;
 
-                        if (!used.Contains(resultingExpression.ToString()))
-                            return new MyResult<Substitution>(
-                                new Substitution
-                                {
-                                    InitialExpression = item.Permutation,
-                                    InitialPart = item.NodeVariation,
-                                    ResultingExpression = resultingExpression,
-                                    ResultingPart = resultingPart,
-                                    Description = rule.Description
-                                });
-                    }
+                    var resultingExpression = item.Permutation
+                        .SubstituteNode(item.NodeVariation.Id, resultingPart)
+                        .Normalize();
+
+                    if (usedExpressions.Contains(resultingExpression.ToString()))
+                        continue;
+
+                    return new Substitution
+                    {
+                        InitialExpression = item.Permutation.Copy(),
+                        InitialPart = item.NodeVariation.Copy(),
+                        ResultingExpression = resultingExpression.Copy(),
+                        ResultingPart = resultingPart.Copy(),
+                        Description = rule.Description
+                    };
                 }
 
-            return MyResult<Substitution>.Empty();
+            return (Substitution)null;
         }
 
         static IEnumerable<Expression> GetCommutativityPermutations(Expression expr, Guid? guid = null)

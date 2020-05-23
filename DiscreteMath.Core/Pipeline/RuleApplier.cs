@@ -17,7 +17,7 @@ namespace DiscreteMath.Core.Pipeline
             var variables = new Dictionary<string, Expression>();
 
             if (CheckMatch(expression, rule.PatternIn, variables))
-                return Substitute(rule.PatternOut, variables);
+                return rule.PatternOut.SubstituteNode(x => x.IsVariable(), x => variables[x.ToString()].Copy());
 
             return null;
         }
@@ -45,8 +45,5 @@ namespace DiscreteMath.Core.Pipeline
 
             return toBeMatched.Children.PairsComply(pattern.Children, (a, b) => CheckMatch(a, b, variables));
         }
-
-        static Expression Substitute(Expression patternOut, Dictionary<string, Expression> variables)
-            => patternOut.AsTree().ChangeTree(x => x.IsVariable(), x => variables[x.ToString()].Copy()).AsExpression();
     }
 }

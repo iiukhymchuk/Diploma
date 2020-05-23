@@ -4,7 +4,7 @@ using DiscreteMath.Core.Language;
 using DiscreteMath.Core.Pipeline;
 using DiscreteMath.Core.Utils;
 
-namespace Tests.SetTheory
+namespace Tests.Core
 {
     [TestClass]
     public class SimplifierFixture
@@ -20,13 +20,13 @@ namespace Tests.SetTheory
             var rules = new Rules();
             syntax = new Syntax(settings);
             grammar = new Grammar(settings);
-            simplifier = new Simplifier(new PatternMatcher(rules.GetRules(), new RuleApplier()), new Normalizer(), new Printer());
+            simplifier = new Simplifier(new PatternMatcher(rules.GetRules(), new RuleApplier()), new Printer());
         }
 
         [DataTestMethod]
         [DataRow("A △ O", "A")]
         [DataRow("A △ A", "∅")]
-        //[DataRow("A △ B", "(A ∩ B') ∪ (A' ∩ B)")]
+        [DataRow("A △ B", "(A ⋂ B') ⋃ (A' ⋂ B)")]
         [DataRow("A - O", "A")]
         [DataRow("A - A", "∅")]
         [DataRow("A - B", "A ∩ B'")]
@@ -56,8 +56,8 @@ namespace Tests.SetTheory
         [DataRow("(A + B) * A", "A")]
         [DataRow("(B + A) * A", "A")]
         [DataRow("A''", "A")]
-        //[DataRow("(A + B)'", "A' ∩ B'")]
-        //[DataRow("(A * B)'", "A' ∪ B'")]
+        [DataRow("(A + B)'", "A' ∩ B'")]
+        [DataRow("(A * B)'", "A' ∪ B'")]
         public void InterpreterReturnsExpectedResultsAllSimpleRules(string input, string expected)
         {
             var tokenizer = syntax.GetTokenizer();
@@ -73,7 +73,7 @@ namespace Tests.SetTheory
             var expectedTokens = tokenizer.TryTokenize(expected).Value;
             var expectedTree = grammar.BuildTree(expectedTokens).Value;
 
-            var equal = TreeUtils.StrictEquals(expectedTree, actualTree);
+            var equal = expectedTree.StrictEquals(actualTree);
 
             Assert.IsTrue(equal, "Not equal");
         }
@@ -88,10 +88,9 @@ namespace Tests.SetTheory
         [DataRow("(B * C) + (B + B * C)", "B")]
         [DataRow("(A' ∪ C)' ∪ (B ∪ B ∩ C) ∩ (B' ∪ (B ∪ C)') ∪ (A' ∪ C)' ∪ A ∪ C ∩ (B ∪ C)", "A ∪ C")]
         [DataRow("(A' + C)' + (B + B * C) * (B' + (B + C)') + (A' + C)'", "A ∩ C'")]
+        [DataRow("(A' + C)' + (A' + C)'", "A ∩ C'")]
         [DataRow("(A * B) + (A * B') + (A' * B)", "A ∪ B")]
         [DataRow("(A + B + C) * (A + B' + C) * (A + C)'", "∅")]
-
-        //[DataRow(@"(((A \ B) ⋂ (A \ C)) ⋃ ((B \ A) ⋂ (B \ C))  ⋃ ((C \ A) ⋂ (C \ B)))", "A")]
         public void InterpreterReturnsExpectedResults(string input, string expected)
         {
             var tokenizer = syntax.GetTokenizer();
@@ -102,12 +101,12 @@ namespace Tests.SetTheory
             var actual = resultLines.Last().SimplifiedExpression;
 
             var actualTokens = tokenizer.TryTokenize(actual).Value;
-            var actualTree = grammar.BuildTree(actualTokens).Value;
+            var actualTree = grammar.BuildTree(actualTokens).Value.Normalize();
 
             var expectedTokens = tokenizer.TryTokenize(expected).Value;
-            var expectedTree = grammar.BuildTree(expectedTokens).Value;
+            var expectedTree = grammar.BuildTree(expectedTokens).Value.Normalize();
 
-            var equal = TreeUtils.StrictEquals(expectedTree, actualTree);
+            var equal = expectedTree.StrictEquals(actualTree);
 
             Assert.IsTrue(equal, "Not equal");
             Assert.IsTrue(resultLines.Count() < 40, "Too long solution");

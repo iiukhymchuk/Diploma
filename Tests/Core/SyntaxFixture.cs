@@ -5,7 +5,7 @@ using System.Linq;
 using DiscreteMath.Core.Language;
 using DiscreteMath.Core.Structs;
 
-namespace Tests.SetTheory
+namespace Tests.Core
 {
     [TestClass]
     public class SyntaxFixture

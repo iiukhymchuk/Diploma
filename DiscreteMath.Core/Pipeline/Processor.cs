@@ -36,10 +36,9 @@ namespace DiscreteMath.Core.Pipeline
             // work with errors
             var simplifier = new Simplifier(
                 new PatternMatcher(rules.GetRules(), new RuleApplier()),
-                new Normalizer(),
                 new Printer());
             var result = simplifier.Run(parseResult.Value);
-            return new MyResult<List<SimplificationDescription>>(result);
+            return result;
         }
 
         static int GetErrorIndex(Superpower.Model.Position position)

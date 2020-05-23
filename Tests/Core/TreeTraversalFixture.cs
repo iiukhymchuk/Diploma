@@ -29,7 +29,7 @@ namespace Tests.Core
             var parseResult = grammar.BuildTree(tokensResult.Value);
 
             var expr = parseResult.Value;
-            var actual = expr.AsTree().ChangeTree(x => true, x => new Negation("'", x)).AsExpression();
+            var actual = expr.SubstituteNode(x => true, x => new Negation("'", x));
 
             var expectedTokens = tokenizer.TryTokenize(output).Value;
             var expected = grammar.BuildTree(expectedTokens).Value;
@@ -50,7 +50,7 @@ namespace Tests.Core
             var parseResult = grammar.BuildTree(tokensResult.Value);
 
             var expr = parseResult.Value;
-            var actual = expr.AsTree().ChangeTree(x => x.Type == typeof(Negation), x => x.Children[0]).AsExpression();
+            var actual = expr.SubstituteNode(x => x.Type == typeof(Negation), x => x.Children[0]);
 
             var expectedTokens = tokenizer.TryTokenize(output).Value;
             var expected = grammar.BuildTree(expectedTokens).Value;

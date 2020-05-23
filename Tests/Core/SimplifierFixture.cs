@@ -91,6 +91,17 @@ namespace Tests.Core
         [DataRow("(A' + C)' + (A' + C)'", "A ∩ C'")]
         [DataRow("(A * B) + (A * B') + (A' * B)", "A ∪ B")]
         [DataRow("(A + B + C) * (A + B' + C) * (A + C)'", "∅")]
+        [DataRow("A * (B - A)", "∅")]
+        [DataRow("A + (B - A)", "A + B")]
+        [DataRow("B - ((B - A) + B)", "∅")]
+        [DataRow("(A - (A - (A * B)))", "A * B")]
+        [DataRow("(A + B) - (A - B)", "B")]
+        [DataRow("(A * B) - (B - A)", "A * B")]
+        [DataRow("(A * B) △ (B - A)", "B")]
+        [DataRow("(A + B) △ (A - B)", "B")]
+        [DataRow("A △ (B - A)", "A + B")]
+        [DataRow("A △ (A - B)", "A * B")]
+        [DataRow("B - (A △ B)", "A * B")]
         public void InterpreterReturnsExpectedResults(string input, string expected)
         {
             var tokenizer = syntax.GetTokenizer();

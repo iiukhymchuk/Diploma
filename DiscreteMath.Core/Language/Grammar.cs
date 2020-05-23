@@ -42,7 +42,7 @@ namespace DiscreteMath.Core.Language
             Variable = Token.EqualTo(TokenType.Variable).Select(x => (Expression)new Variable(x.ToStringValue()));
             ExpressionInParens =
                 from lparen in Token.EqualTo(TokenType.LParen)
-                from expr in Parse.Ref(() => Union)
+                from expr in Parse.Ref(() => SymmetricDifference)
                 from rparen in Token.EqualTo(TokenType.RParen)
                 select expr;
             Factor = Set.Try()
